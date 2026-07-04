@@ -1,18 +1,19 @@
 // Підключаємо Express
 const express = require('express');
 
+// Підключаємо наші маршрути
+const homeRoutes = require('./routes/homeRoutes');
+
 // Створюємо застосунок (наш сервер)
 const app = express();
 
 // Порт, на якому працюватиме сервер
 const PORT = 3000;
 
-// Маршрут: коли хтось заходить на головну адресу "/" — відповідаємо текстом
-app.get('/', (req, res) => {
-  res.send('Привіт! Сервер PlanMoney працює !!! 🎉');
-});
+// Підключаємо маршрути до сервера
+app.use('/', homeRoutes);
 
-// Запускаємо сервер і слухаємо запити на вказаному порту
+// Запускаємо сервер
 app.listen(PORT, () => {
   console.log(`Сервер працює: http://localhost:${PORT}`);
 });
