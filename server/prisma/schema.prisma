@@ -1,0 +1,38 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Таблиця користувачів
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+
+  // Зв'язок: один користувач має багато транзакцій
+  transactions Transaction[]
+}
+
+// Таблиця транзакцій (доходи та витрати)
+model Transaction {
+  id        Int      @id @default(autoincrement())
+  amount    Int
+  type      String
+  category  String
+  note      String?
+  date      DateTime @default(now())
+
+  // Зв'язок: кожна транзакція належить одному користувачу
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+}
