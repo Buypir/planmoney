@@ -4,6 +4,9 @@ const express = require('express');
 // Підключаємо наші маршрути
 const homeRoutes = require('./routes/homeRoutes');
 
+// Підключаємо базу даних
+const prisma = require('./prismaClient');
+
 // Створюємо застосунок (наш сервер)
 const app = express();
 
