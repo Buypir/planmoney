@@ -3,18 +3,20 @@ const express = require('express');
 
 // Підключаємо наші маршрути
 const homeRoutes = require('./routes/homeRoutes');
-
-// Підключаємо базу даних
-const prisma = require('./prismaClient');
+const transactionRoutes = require('./routes/transactionRoutes');
 
 // Створюємо застосунок (наш сервер)
 const app = express();
 
-// Порт, на якому працюватиме сервер
+// Порт
 const PORT = 3000;
 
-// Підключаємо маршрути до сервера
+// Дозволяємо серверу читати JSON із запитів (потрібно для POST)
+app.use(express.json());
+
+// Підключаємо маршрути
 app.use('/', homeRoutes);
+app.use('/transactions', transactionRoutes);
 
 // Запускаємо сервер
 app.listen(PORT, () => {
