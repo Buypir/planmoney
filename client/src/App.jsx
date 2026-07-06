@@ -5,6 +5,7 @@ import Tasks from './pages/Tasks';
 import Finance from './pages/Finance';
 import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
+import Login from './pages/Login';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <Route path="/finance" element={<Finance />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/login" element={<Login />} />
         </Routes>
       </main>
     </div>
