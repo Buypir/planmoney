@@ -20,6 +20,7 @@ model User {
 
   // Зв'язок: один користувач має багато транзакцій
   transactions Transaction[]
+  tasks        Task[]
 }
 
 // Таблиця транзакцій (доходи та витрати)
@@ -32,6 +33,22 @@ model Transaction {
   date      DateTime @default(now())
 
   // Зв'язок: кожна транзакція належить одному користувачу
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+// Таблиця задач
+model Task {
+  id        Int      @id @default(autoincrement())
+  title     String
+  note      String?
+  category  String?
+  priority  String   @default("medium")
+  status    String   @default("todo")
+  dueDate   DateTime?
+  createdAt DateTime @default(now())
+
+  // Зв'язок: кожна задача належить одному користувачу
   userId    Int
   user      User     @relation(fields: [userId], references: [id])
 }
