@@ -3,7 +3,9 @@ const prisma = require('../prismaClient');
 
 // Отримати всі транзакції
 const getAllTransactions = async (req, res) => {
-  const transactions = await prisma.transaction.findMany();
+  const transactions = await prisma.transaction.findMany({
+    where: { userId: req.userId },
+  });
   res.json(transactions);
 };
 
@@ -17,7 +19,7 @@ const createTransaction = async (req, res) => {
       type,
       category,
       note,
-      userId: 1, // тимчасово: прив'язуємо до Богдана (id=1). Пізніше візьмемо з авторизації
+      userId: req.userId, // було: userId: 1
     },
   });
 

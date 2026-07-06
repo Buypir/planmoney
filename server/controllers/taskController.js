@@ -3,7 +3,9 @@ const prisma = require('../prismaClient');
 
 // Отримати всі задачі
 const getAllTasks = async (req, res) => {
-  const tasks = await prisma.task.findMany();
+  const tasks = await prisma.task.findMany({
+    where: { userId: req.userId },
+  });
   res.json(tasks);
 };
 
@@ -19,7 +21,7 @@ const createTask = async (req, res) => {
       priority,
       status,
       dueDate: dueDate ? new Date(dueDate) : null,
-      userId: 1, // тимчасово: Богдан
+      userId: req.userId,
     },
   });
 

@@ -3,7 +3,9 @@ const prisma = require('../prismaClient');
 
 // Отримати всі категорії
 const getAllCategories = async (req, res) => {
-  const categories = await prisma.category.findMany();
+  const categories = await prisma.category.findMany({
+    where: { userId: req.userId },
+  });
   res.json(categories);
 };
 
@@ -16,7 +18,7 @@ const createCategory = async (req, res) => {
       name,
       type,
       color,
-      userId: 1, // тимчасово: Богдан
+      userId: req.userId, // тимчасово: Богдан
     },
   });
 
