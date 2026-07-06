@@ -1,5 +1,6 @@
 // Підключаємо Express
 const express = require('express');
+const cors = require('cors');
 
 // Підключаємо наші маршрути
 const homeRoutes = require('./routes/homeRoutes');
@@ -14,6 +15,8 @@ const app = express();
 
 // Порт
 const PORT = 3000;
+
+app.use(cors());
 
 // Дозволяємо серверу читати JSON із запитів (потрібно для POST)
 app.use(express.json());
