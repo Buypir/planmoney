@@ -5,6 +5,7 @@ const express = require('express');
 const homeRoutes = require('./routes/homeRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
 const taskRoutes = require('./routes/taskRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
 
 // Створюємо застосунок (наш сервер)
 const app = express();
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use('/', homeRoutes);
 app.use('/transactions', transactionRoutes);
 app.use('/tasks', taskRoutes);
+app.use('/categories', categoryRoutes);
 
 // Запускаємо сервер
 app.listen(PORT, () => {

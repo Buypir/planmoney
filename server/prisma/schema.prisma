@@ -21,6 +21,7 @@ model User {
   // Зв'язок: один користувач має багато транзакцій
   transactions Transaction[]
   tasks        Task[]
+  categories     Category[]
 }
 
 // Таблиця транзакцій (доходи та витрати)
@@ -51,4 +52,16 @@ model Task {
   // Зв'язок: кожна задача належить одному користувачу
   userId    Int
   user      User     @relation(fields: [userId], references: [id])
+}
+
+// Таблиця категорій
+model Category {
+  id     Int     @id @default(autoincrement())
+  name   String
+  type   String
+  color  String?
+
+  // Зв'язок: кожна категорія належить одному користувачу
+  userId Int
+  user   User    @relation(fields: [userId], references: [id])
 }
