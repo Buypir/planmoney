@@ -1,8 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -19,10 +17,10 @@ model User {
   password  String
   createdAt DateTime @default(now())
 
-  // Зв'язок: один користувач має багато транзакцій
   transactions Transaction[]
   tasks        Task[]
-  categories     Category[]
+  categories   Category[]
+  goals        Goal[]
 }
 
 // Таблиця транзакцій (доходи та витрати)
@@ -34,25 +32,23 @@ model Transaction {
   note      String?
   date      DateTime @default(now())
 
-  // Зв'язок: кожна транзакція належить одному користувачу
   userId    Int
   user      User     @relation(fields: [userId], references: [id])
 }
 
 // Таблиця задач
 model Task {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   title     String
   note      String?
   category  String?
-  priority  String   @default("medium")
-  status    String   @default("todo")
+  priority  String    @default("medium")
+  status    String    @default("todo")
   dueDate   DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
-  // Зв'язок: кожна задача належить одному користувачу
   userId    Int
-  user      User     @relation(fields: [userId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
 }
 
 // Таблиця категорій
@@ -62,7 +58,18 @@ model Category {
   type   String
   color  String?
 
-  // Зв'язок: кожна категорія належить одному користувачу
   userId Int
   user   User    @relation(fields: [userId], references: [id])
+}
+
+// Таблиця цілей накопичення
+model Goal {
+  id           Int      @id @default(autoincrement())
+  title        String
+  targetAmount Int
+  savedAmount  Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  userId       Int
+  user         User     @relation(fields: [userId], references: [id])
 }
