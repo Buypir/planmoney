@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { translate } from '../i18n';
 import { API_URL } from '../config';
 
@@ -16,20 +16,28 @@ export function SettingsProvider({ children }) {
   const [period, setPeriod] = useState('month');
   const [rates, setRates] = useState(null);
 
-  useEffect(() => {
+  // Викликається на старті й після входу/виходу — інакше налаштування
+  // залишились би порожніми до перезавантаження сторінки
+  const reloadSettings = useCallback(async () => {
     const token = localStorage.getItem('token');
-    if (!token) return;
-    fetch(API_URL + '/settings', {
-      headers: { Authorization: 'Bearer ' + token },
-    })
-      .then((res) => res.json())
-      .then(setSettings);
-    fetch(API_URL + '/exchange-rates', {
-      headers: { Authorization: 'Bearer ' + token },
-    })
-      .then((res) => res.json())
-      .then(setRates);
+    if (!token) {
+      setSettings(null);
+      setRates(null);
+      return;
+    }
+    const headers = { Authorization: 'Bearer ' + token };
+    const [settingsRes, ratesRes] = await Promise.all([
+      fetch(API_URL + '/settings', { headers }),
+      fetch(API_URL + '/exchange-rates', { headers }),
+    ]);
+    setSettings(settingsRes.ok ? await settingsRes.json() : null);
+    setRates(ratesRes.ok ? await ratesRes.json() : null);
   }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    reloadSettings();
+  }, [reloadSettings]);
 
   useEffect(() => {
     if (!settings) return;
@@ -70,7 +78,7 @@ export function SettingsProvider({ children }) {
   const t = (key, ...args) => translate(settings?.language || 'uk', key, ...args);
 
   return (
-    <SettingsContext.Provider value={{ settings, saveSettings, t, isDark, period, setPeriod, rates }}>
+    <SettingsContext.Provider value={{ settings, saveSettings, reloadSettings, t, isDark, period, setPeriod, rates }}>
       {children}
     </SettingsContext.Provider>
   );

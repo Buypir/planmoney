@@ -12,7 +12,7 @@ import Register from './pages/Register';
 import { useSettings } from './context/SettingsContext';
 
 function AppLayout() {
-  const { t } = useSettings();
+  const { t, reloadSettings } = useSettings();
   const navigate = useNavigate();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -22,8 +22,9 @@ function AppLayout() {
     setMenuOpen(false);
   }, [location.pathname]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     localStorage.removeItem('token');
+    await reloadSettings();
     navigate('/login');
   };
 

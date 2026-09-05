@@ -4,7 +4,7 @@ import { useSettings } from '../context/SettingsContext';
 import { API_URL } from '../config';
 
 function Register() {
-  const { t } = useSettings();
+  const { t, reloadSettings } = useSettings();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -40,6 +40,7 @@ function Register() {
       }
 
       localStorage.setItem('token', loginData.token);
+      await reloadSettings();
       navigate('/');
     } catch {
       setError(t('register_error_connection'));

@@ -4,9 +4,9 @@ import { useSettings } from '../context/SettingsContext';
 import { API_URL } from '../config';
 
 function Login() {
-  const { t } = useSettings();
-  const [email, setEmail] = useState('bogdan@email.com');
-  const [password, setPassword] = useState('bogdan123');
+  const { t, reloadSettings } = useSettings();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -29,9 +29,12 @@ function Login() {
       // Зберігаємо токен у пам'яті браузера
       localStorage.setItem('token', data.token);
 
+      // Підтягуємо налаштування вже під новим токеном
+      await reloadSettings();
+
       // Переходимо на дашборд
       navigate('/');
-    } catch (err) {
+    } catch {
       setError(t('login_error_connection'));
     }
   };
