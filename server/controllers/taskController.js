@@ -1,5 +1,6 @@
 // Логіка для задач
 const prisma = require('../prismaClient');
+const { validateTask } = require('../validation');
 
 // Отримати всі задачі
 const getAllTasks = async (req, res) => {
@@ -12,6 +13,9 @@ const getAllTasks = async (req, res) => {
 // Додати нову задачу
 const createTask = async (req, res) => {
   const { title, note, category, priority, status, dueDate } = req.body;
+
+  const invalid = validateTask({ title, priority, status, category, note, dueDate });
+  if (invalid) return res.status(400).json({ error: invalid });
 
   const newTask = await prisma.task.create({
     data: {
@@ -32,6 +36,9 @@ const createTask = async (req, res) => {
 const updateTask = async (req, res) => {
   const { id } = req.params;
   const { title, note, category, priority, status, dueDate } = req.body;
+
+  const invalid = validateTask({ title, priority, status, category, note, dueDate });
+  if (invalid) return res.status(400).json({ error: invalid });
 
   try {
     const updated = await prisma.task.update({

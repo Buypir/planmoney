@@ -1,5 +1,6 @@
 // Логіка для категорій
 const prisma = require('../prismaClient');
+const { validateCategory } = require('../validation');
 
 // Отримати всі категорії
 const getAllCategories = async (req, res) => {
@@ -12,6 +13,9 @@ const getAllCategories = async (req, res) => {
 // Додати нову категорію
 const createCategory = async (req, res) => {
   const { name, type, color } = req.body;
+
+  const invalid = validateCategory({ name, type });
+  if (invalid) return res.status(400).json({ error: invalid });
 
   const newCategory = await prisma.category.create({
     data: {
@@ -29,6 +33,9 @@ const createCategory = async (req, res) => {
 const updateCategory = async (req, res) => {
   const { id } = req.params;
   const { name, type, color } = req.body;
+
+  const invalid = validateCategory({ name, type });
+  if (invalid) return res.status(400).json({ error: invalid });
 
   try {
     const updated = await prisma.category.update({

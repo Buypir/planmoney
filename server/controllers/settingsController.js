@@ -1,5 +1,6 @@
 // Логіка для налаштувань користувача
 const prisma = require('../prismaClient');
+const { validateSettings } = require('../validation');
 
 // Отримати налаштування (створює дефолтні, якщо ще немає)
 const getSettings = async (req, res) => {
@@ -43,6 +44,9 @@ const updateSettings = async (req, res) => {
 
   // Прибираємо undefined-поля, щоб не затерти наявні значення
   Object.keys(data).forEach((key) => data[key] === undefined && delete data[key]);
+
+  const invalid = validateSettings(data);
+  if (invalid) return res.status(400).json({ error: invalid });
 
   const updated = await prisma.setting.upsert({
     where: { userId: req.userId },

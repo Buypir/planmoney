@@ -1,5 +1,7 @@
 // Логіка для цілей накопичення
 const prisma = require('../prismaClient');
+const { validateGoal } = require('../validation');
+const { getRates } = require('./exchangeRateController');
 
 // Отримати всі цілі користувача
 const getAllGoals = async (req, res) => {
@@ -10,6 +12,10 @@ const getAllGoals = async (req, res) => {
 // Створити нову ціль
 const createGoal = async (req, res) => {
   const { title, targetAmount } = req.body;
+
+  const invalid = validateGoal({ title, targetAmount });
+  if (invalid) return res.status(400).json({ error: invalid });
+
   const newGoal = await prisma.goal.create({
     data: { title, targetAmount: Number(targetAmount), userId: req.userId },
   });
@@ -37,11 +43,27 @@ const addToGoal = async (req, res) => {
     return res.status(400).json({ error: `Забагато. До цілі залишилось лише ${remaining} грн` });
   }
 
-  // 2. Перевірка балансу
-  const transactions = await prisma.transaction.findMany({ where: { userId: req.userId } });
-  const income = transactions.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0);
-  const expense = transactions.filter((t) => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
-  const balance = income - expense;
+  // 2. Перевірка балансу. Суми з валютних рахунків переводимо в гривню за курсом НБУ,
+  // інакше 100 доларів рахувались би як 100 гривень.
+  const transactions = await prisma.transaction.findMany({
+    where: { userId: req.userId },
+    include: { account: true },
+  });
+
+  let rates;
+  try {
+    rates = await getRates();
+  } catch {
+    return res.status(502).json({ error: 'Не вдалося отримати курс НБУ. Спробуй пізніше.' });
+  }
+
+  const inUAH = (tx) => {
+    const currency = tx.account?.currency || 'UAH';
+    return tx.amount * (currency === 'UAH' ? 1 : (rates[currency] || 1));
+  };
+  const income = transactions.filter((t) => t.type === 'income').reduce((s, t) => s + inUAH(t), 0);
+  const expense = transactions.filter((t) => t.type === 'expense').reduce((s, t) => s + inUAH(t), 0);
+  const balance = Math.round(income - expense);
   if (sum > balance) {
     return res.status(400).json({ error: `Недостатньо коштів. На балансі: ${balance} грн` });
   }

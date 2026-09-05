@@ -1,6 +1,7 @@
 // Логіка для транзакцій
 const prisma = require('../prismaClient');
 const { getRates } = require('./exchangeRateController');
+const { validateTransaction } = require('../validation');
 
 // Перевіряє, що рахунок (якщо вказаний) належить поточному користувачу
 const verifyOwnAccounts = async (userId, ...accountIds) => {
@@ -39,6 +40,9 @@ const getAllTransactions = async (req, res) => {
 const createTransaction = async (req, res) => {
   const { amount, type, category, note, status, accountId, toAccountId } = req.body;
 
+  const invalid = validateTransaction({ amount, type, category, note, accountId, toAccountId });
+  if (invalid) return res.status(400).json({ error: invalid });
+
   if (!(await verifyOwnAccounts(req.userId, accountId, toAccountId))) {
     return res.status(403).json({ error: 'Рахунок не знайдено' });
   }
@@ -73,6 +77,9 @@ const createTransaction = async (req, res) => {
 const updateTransaction = async (req, res) => {
   const { id } = req.params;
   const { amount, type, category, note, status, accountId, toAccountId } = req.body;
+
+  const invalid = validateTransaction({ amount, type, category, note, accountId, toAccountId });
+  if (invalid) return res.status(400).json({ error: invalid });
 
   if (!(await verifyOwnAccounts(req.userId, accountId, toAccountId))) {
     return res.status(403).json({ error: 'Рахунок не знайдено' });

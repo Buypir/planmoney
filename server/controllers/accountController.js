@@ -1,5 +1,6 @@
 // Логіка для рахунків користувача
 const prisma = require('../prismaClient');
+const { validateAccount } = require('../validation');
 
 // Отримати всі рахунки користувача
 const getAllAccounts = async (req, res) => {
@@ -10,6 +11,10 @@ const getAllAccounts = async (req, res) => {
 // Створити новий рахунок
 const createAccount = async (req, res) => {
   const { name, currency } = req.body;
+
+  const invalid = validateAccount({ name, currency });
+  if (invalid) return res.status(400).json({ error: invalid });
+
   const newAccount = await prisma.account.create({
     data: { name, currency: currency || 'UAH', userId: req.userId },
   });
