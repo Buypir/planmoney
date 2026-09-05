@@ -8,6 +8,7 @@ import { useSettings } from '../context/SettingsContext';
 import { getChartColors } from '../chartTheme';
 import { getPeriodRange, getPreviousPeriodRange, inRange, pctChange, fmtChange } from '../period';
 import { baseTransactions } from '../money';
+import { API_URL } from '../config';
 
 function startOfWeek(date) {
   const d = new Date(date);
@@ -72,9 +73,9 @@ function Analytics() {
 
   const loadData = async () => {
     const [txRes, accRes, taskRes] = await Promise.all([
-      fetch('http://localhost:3000/transactions', { headers: { 'Authorization': 'Bearer ' + token } }),
-      fetch('http://localhost:3000/accounts', { headers: { 'Authorization': 'Bearer ' + token } }),
-      fetch('http://localhost:3000/tasks', { headers: { 'Authorization': 'Bearer ' + token } }),
+      fetch(API_URL + '/transactions', { headers: { 'Authorization': 'Bearer ' + token } }),
+      fetch(API_URL + '/accounts', { headers: { 'Authorization': 'Bearer ' + token } }),
+      fetch(API_URL + '/tasks', { headers: { 'Authorization': 'Bearer ' + token } }),
     ]);
     setTransactions(await txRes.json());
     setAccounts(await accRes.json());

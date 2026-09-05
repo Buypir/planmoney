@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { translate } from '../i18n';
+import { API_URL } from '../config';
 
 const SettingsContext = createContext(null);
 
@@ -18,12 +19,12 @@ export function SettingsProvider({ children }) {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) return;
-    fetch('http://localhost:3000/settings', {
+    fetch(API_URL + '/settings', {
       headers: { Authorization: 'Bearer ' + token },
     })
       .then((res) => res.json())
       .then(setSettings);
-    fetch('http://localhost:3000/exchange-rates', {
+    fetch(API_URL + '/exchange-rates', {
       headers: { Authorization: 'Bearer ' + token },
     })
       .then((res) => res.json())
@@ -56,7 +57,7 @@ export function SettingsProvider({ children }) {
   const saveSettings = async (partial) => {
     setSettings((prev) => ({ ...prev, ...partial }));
     const token = localStorage.getItem('token');
-    const res = await fetch('http://localhost:3000/settings', {
+    const res = await fetch(API_URL + '/settings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
       body: JSON.stringify(partial),

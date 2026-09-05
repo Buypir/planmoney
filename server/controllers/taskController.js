@@ -28,35 +28,39 @@ const createTask = async (req, res) => {
   res.json(newTask);
 };
 
-// Оновити задачу за id
+// Оновити задачу за id (лише якщо вона належить поточному користувачу)
 const updateTask = async (req, res) => {
   const { id } = req.params;
   const { title, note, category, priority, status, dueDate } = req.body;
 
-  const updated = await prisma.task.update({
-    where: { id: Number(id) },
-    data: {
-      title,
-      note,
-      category,
-      priority,
-      status,
-      dueDate: dueDate ? new Date(dueDate) : null,
-    },
-  });
-
-  res.json(updated);
+  try {
+    const updated = await prisma.task.update({
+      where: { id: Number(id), userId: req.userId },
+      data: {
+        title,
+        note,
+        category,
+        priority,
+        status,
+        dueDate: dueDate ? new Date(dueDate) : null,
+      },
+    });
+    res.json(updated);
+  } catch {
+    res.status(404).json({ error: 'Задачу не знайдено' });
+  }
 };
 
-// Видалити задачу за id
+// Видалити задачу за id (лише якщо вона належить поточному користувачу)
 const deleteTask = async (req, res) => {
   const { id } = req.params;
 
-  await prisma.task.delete({
-    where: { id: Number(id) },
-  });
-
-  res.json({ message: 'Задачу видалено' });
+  try {
+    await prisma.task.delete({ where: { id: Number(id), userId: req.userId } });
+    res.json({ message: 'Задачу видалено' });
+  } catch {
+    res.status(404).json({ error: 'Задачу не знайдено' });
+  }
 };
 
 module.exports = { getAllTasks, createTask, updateTask, deleteTask };

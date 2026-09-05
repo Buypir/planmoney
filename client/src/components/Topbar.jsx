@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Plus, ListPlus } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
+import { API_URL } from '../config';
 
 export const REFRESH_EVENT = 'planmoney:refresh';
 
@@ -17,7 +18,7 @@ function AddTaskModal({ onClose }) {
   const token = localStorage.getItem('token');
 
   useEffect(() => {
-    fetch('http://localhost:3000/categories', { headers: { Authorization: 'Bearer ' + token } })
+    fetch(API_URL + '/categories', { headers: { Authorization: 'Bearer ' + token } })
       .then((res) => res.json())
       .then(setSavedCategories);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -25,7 +26,7 @@ function AddTaskModal({ onClose }) {
 
   const handleAdd = async () => {
     if (!title) return;
-    await fetch('http://localhost:3000/tasks', {
+    await fetch(API_URL + '/tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
       body: JSON.stringify({
@@ -147,8 +148,8 @@ function AddTransactionModal({ onClose }) {
   useEffect(() => {
     const headers = { Authorization: 'Bearer ' + token };
     Promise.all([
-      fetch('http://localhost:3000/accounts', { headers }).then((res) => res.json()),
-      fetch('http://localhost:3000/categories', { headers }).then((res) => res.json()),
+      fetch(API_URL + '/accounts', { headers }).then((res) => res.json()),
+      fetch(API_URL + '/categories', { headers }).then((res) => res.json()),
     ]).then(([accData, catData]) => {
       setAccounts(accData);
       if (accData.length > 0) setAccountId(String(accData[0].id));
@@ -165,7 +166,7 @@ function AddTransactionModal({ onClose }) {
       return;
     }
 
-    await fetch('http://localhost:3000/transactions', {
+    await fetch(API_URL + '/transactions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
       body: JSON.stringify({
@@ -306,8 +307,8 @@ function SearchBox() {
     const headers = { Authorization: 'Bearer ' + token };
     const timeout = setTimeout(() => {
       Promise.all([
-        fetch('http://localhost:3000/tasks', { headers }).then((res) => res.json()),
-        fetch('http://localhost:3000/transactions', { headers }).then((res) => res.json()),
+        fetch(API_URL + '/tasks', { headers }).then((res) => res.json()),
+        fetch(API_URL + '/transactions', { headers }).then((res) => res.json()),
       ]).then(([tasksData, txData]) => {
         const tasks = (Array.isArray(tasksData) ? tasksData : []).filter((task) =>
           task.title?.toLowerCase().includes(q) ||

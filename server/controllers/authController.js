@@ -3,9 +3,18 @@ const prisma = require('../prismaClient');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 // Реєстрація нового користувача
 const register = async (req, res) => {
   const { email, name, password } = req.body;
+
+  if (!email || !EMAIL_REGEX.test(email)) {
+    return res.status(400).json({ error: 'Некоректний email' });
+  }
+  if (!password || password.length < 6) {
+    return res.status(400).json({ error: 'Пароль має містити щонайменше 6 символів' });
+  }
 
   // 1. Перевіряємо, чи такий email уже зайнятий
   const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -36,6 +45,10 @@ const register = async (req, res) => {
 // Вхід користувача
 const login = async (req, res) => {
   const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Невірний email або пароль' });
+  }
 
   // 1. Знаходимо користувача за email
   const user = await prisma.user.findUnique({ where: { email } });

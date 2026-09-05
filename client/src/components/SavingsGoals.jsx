@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Target, Plus, Trash2 } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
+import { API_URL } from '../config';
 
 function SavingsGoals({ onUpdate }) {
   const { t } = useSettings();
@@ -16,7 +17,7 @@ function SavingsGoals({ onUpdate }) {
   const token = localStorage.getItem('token');
 
   const fetchGoals = async () => {
-    const res = await fetch('http://localhost:3000/goals', {
+    const res = await fetch(API_URL + '/goals', {
       headers: { 'Authorization': 'Bearer ' + token },
     });
     const data = await res.json();
@@ -26,7 +27,7 @@ function SavingsGoals({ onUpdate }) {
   useEffect(() => {
     let active = true;
     (async () => {
-      const res = await fetch('http://localhost:3000/goals', {
+      const res = await fetch(API_URL + '/goals', {
         headers: { 'Authorization': 'Bearer ' + token },
       });
       const data = await res.json();
@@ -38,7 +39,7 @@ function SavingsGoals({ onUpdate }) {
 
   const handleCreate = async () => {
     if (!title || !targetAmount) return;
-    await fetch('http://localhost:3000/goals', {
+    await fetch(API_URL + '/goals', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
       body: JSON.stringify({ title, targetAmount: Number(targetAmount) }),
@@ -60,7 +61,7 @@ function SavingsGoals({ onUpdate }) {
     const amount = Number(addAmount);
     if (!addAmount || isNaN(amount) || amount <= 0) return;
 
-    const res = await fetch(`http://localhost:3000/goals/${addingGoal.id}/add`, {
+    const res = await fetch(`${API_URL}/goals/${addingGoal.id}/add`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
       body: JSON.stringify({ amount }),
@@ -79,7 +80,7 @@ function SavingsGoals({ onUpdate }) {
   };
 
   const handleDelete = async (goalId) => {
-    await fetch(`http://localhost:3000/goals/${goalId}`, {
+    await fetch(`${API_URL}/goals/${goalId}`, {
       method: 'DELETE',
       headers: { 'Authorization': 'Bearer ' + token },
     });

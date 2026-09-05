@@ -16,11 +16,15 @@ const createAccount = async (req, res) => {
   res.json(newAccount);
 };
 
-// Видалити рахунок за id
+// Видалити рахунок за id (лише якщо він належить поточному користувачу)
 const deleteAccount = async (req, res) => {
   const { id } = req.params;
-  await prisma.account.delete({ where: { id: Number(id) } });
-  res.json({ message: 'Рахунок видалено' });
+  try {
+    await prisma.account.delete({ where: { id: Number(id), userId: req.userId } });
+    res.json({ message: 'Рахунок видалено' });
+  } catch {
+    res.status(404).json({ error: 'Рахунок не знайдено' });
+  }
 };
 
 module.exports = { getAllAccounts, createAccount, deleteAccount };

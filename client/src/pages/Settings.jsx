@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import Topbar, { REFRESH_EVENT } from '../components/Topbar';
 import { useSettings } from '../context/SettingsContext';
+import { API_URL } from '../config';
 
 const CATEGORY_TYPES = [
   { key: 'task', labelKey: 'category_task' },
@@ -73,10 +74,10 @@ function Settings() {
 
   const loadData = async () => {
     const [meRes, catRes, goalsRes, txRes] = await Promise.all([
-      fetch('http://localhost:3000/auth/me', { headers: authHeaders }),
-      fetch('http://localhost:3000/categories', { headers: authHeaders }),
-      fetch('http://localhost:3000/goals', { headers: authHeaders }),
-      fetch('http://localhost:3000/transactions', { headers: authHeaders }),
+      fetch(API_URL + '/auth/me', { headers: authHeaders }),
+      fetch(API_URL + '/categories', { headers: authHeaders }),
+      fetch(API_URL + '/goals', { headers: authHeaders }),
+      fetch(API_URL + '/transactions', { headers: authHeaders }),
     ]);
     const me = await meRes.json();
     setUser(me);
@@ -101,7 +102,7 @@ function Settings() {
   }, [settings?.monthlyBudget]);
 
   const saveProfile = async () => {
-    const res = await fetch('http://localhost:3000/auth/me', {
+    const res = await fetch(API_URL + '/auth/me', {
       method: 'PUT',
       headers: jsonHeaders,
       body: JSON.stringify({ name: nameDraft }),
@@ -114,7 +115,7 @@ function Settings() {
 
   const addCategory = async (type) => {
     if (!newCatName.trim()) return;
-    await fetch('http://localhost:3000/categories', {
+    await fetch(API_URL + '/categories', {
       method: 'POST',
       headers: jsonHeaders,
       body: JSON.stringify({ name: newCatName, type, color: newCatColor }),
@@ -122,12 +123,12 @@ function Settings() {
     setNewCatName('');
     setNewCatColor(CATEGORY_COLORS[0]);
     setAddingType(null);
-    const res = await fetch('http://localhost:3000/categories', { headers: authHeaders });
+    const res = await fetch(API_URL + '/categories', { headers: authHeaders });
     setCategories(await res.json());
   };
 
   const deleteCategory = async (id) => {
-    await fetch(`http://localhost:3000/categories/${id}`, { method: 'DELETE', headers: authHeaders });
+    await fetch(`${API_URL}/categories/${id}`, { method: 'DELETE', headers: authHeaders });
     setCategories((prev) => prev.filter((c) => c.id !== id));
   };
 

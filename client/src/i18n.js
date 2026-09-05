@@ -7,6 +7,8 @@ export const translations = {
     nav_analytics: 'Аналітика',
     nav_settings: 'Налаштування',
     nav_logout: 'Вийти',
+    nav_open_menu: 'Відкрити меню',
+    nav_close_menu: 'Закрити меню',
 
     topbar_today: 'Сьогодні',
     topbar_week: 'Тиждень',
@@ -317,6 +319,8 @@ export const translations = {
     nav_analytics: 'Analytics',
     nav_settings: 'Settings',
     nav_logout: 'Log out',
+    nav_open_menu: 'Open menu',
+    nav_close_menu: 'Close menu',
 
     topbar_today: 'Today',
     topbar_week: 'Week',

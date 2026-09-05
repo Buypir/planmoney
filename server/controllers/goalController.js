@@ -26,7 +26,7 @@ const addToGoal = async (req, res) => {
     return res.status(400).json({ error: 'Некоректна сума' });
   }
 
-  const goal = await prisma.goal.findUnique({ where: { id: Number(id) } });
+  const goal = await prisma.goal.findUnique({ where: { id: Number(id), userId: req.userId } });
   if (!goal) {
     return res.status(404).json({ error: 'Ціль не знайдено' });
   }
@@ -64,11 +64,15 @@ const addToGoal = async (req, res) => {
   res.json(updated);
 };
 
-// Видалити ціль
+// Видалити ціль (лише якщо вона належить поточному користувачу)
 const deleteGoal = async (req, res) => {
   const { id } = req.params;
-  await prisma.goal.delete({ where: { id: Number(id) } });
-  res.json({ message: 'Ціль видалено' });
+  try {
+    await prisma.goal.delete({ where: { id: Number(id), userId: req.userId } });
+    res.json({ message: 'Ціль видалено' });
+  } catch {
+    res.status(404).json({ error: 'Ціль не знайдено' });
+  }
 };
 
 module.exports = { getAllGoals, createGoal, addToGoal, deleteGoal };

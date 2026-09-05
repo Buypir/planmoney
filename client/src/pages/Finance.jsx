@@ -6,6 +6,7 @@ import ExpenseChart from '../components/ExpenseChart';
 import { useSettings } from '../context/SettingsContext';
 import { getPeriodRange, getPreviousPeriodRange, inRange, pctChange, fmtChange, last7DaysTrend } from '../period';
 import { baseTransactions, accountCurrency, convertFromUAH, formatMoney } from '../money';
+import { API_URL } from '../config';
 
 const changeSuffixKey = { today: 'stat_since_yesterday', week: 'stat_vs_prev_week', month: 'stat_vs_prev_month', year: 'stat_vs_prev_year' };
 const CURRENCIES = ['UAH', 'USD', 'EUR'];
@@ -35,9 +36,9 @@ function Finance() {
 
   const loadData = async () => {
     const [txRes, accRes, catRes] = await Promise.all([
-      fetch('http://localhost:3000/transactions', { headers: authHeaders }),
-      fetch('http://localhost:3000/accounts', { headers: authHeaders }),
-      fetch('http://localhost:3000/categories', { headers: authHeaders }),
+      fetch(API_URL + '/transactions', { headers: authHeaders }),
+      fetch(API_URL + '/accounts', { headers: authHeaders }),
+      fetch(API_URL + '/categories', { headers: authHeaders }),
     ]);
     setTransactions(await txRes.json());
     setAccounts(await accRes.json());
@@ -60,7 +61,7 @@ function Finance() {
       return;
     }
 
-    await fetch('http://localhost:3000/transactions', {
+    await fetch(API_URL + '/transactions', {
       method: 'POST',
       headers: jsonHeaders,
       body: JSON.stringify({
@@ -80,7 +81,7 @@ function Finance() {
   };
 
   const handleDelete = async (id) => {
-    await fetch(`http://localhost:3000/transactions/${id}`, {
+    await fetch(`${API_URL}/transactions/${id}`, {
       method: 'DELETE',
       headers: authHeaders,
     });
@@ -89,7 +90,7 @@ function Finance() {
 
   const handleAddAccount = async () => {
     if (!newAccountName.trim()) return;
-    await fetch('http://localhost:3000/accounts', {
+    await fetch(API_URL + '/accounts', {
       method: 'POST',
       headers: jsonHeaders,
       body: JSON.stringify({ name: newAccountName, currency: newAccountCurrency }),
@@ -100,7 +101,7 @@ function Finance() {
   };
 
   const handleDeleteAccount = async (id) => {
-    await fetch(`http://localhost:3000/accounts/${id}`, {
+    await fetch(`${API_URL}/accounts/${id}`, {
       method: 'DELETE',
       headers: authHeaders,
     });

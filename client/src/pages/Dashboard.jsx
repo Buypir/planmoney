@@ -8,6 +8,7 @@ import IncomeExpenseChart from '../components/IncomeExpenseChart';
 import { useSettings } from '../context/SettingsContext';
 import { getPeriodRange, getPreviousPeriodRange, inRange, pctChange, fmtChange, last7DaysTrend } from '../period';
 import { baseTransactions, accountCurrency, convertFromUAH, formatMoney } from '../money';
+import { API_URL } from '../config';
 
 const changeSuffixKey = { today: 'stat_since_yesterday', week: 'stat_vs_prev_week', month: 'stat_vs_prev_month', year: 'stat_vs_prev_year' };
 
@@ -22,10 +23,10 @@ function Dashboard() {
 
   const loadData = async () => {
     const [txRes, accRes, taskRes, meRes] = await Promise.all([
-      fetch('http://localhost:3000/transactions', { headers: { 'Authorization': 'Bearer ' + token } }),
-      fetch('http://localhost:3000/accounts', { headers: { 'Authorization': 'Bearer ' + token } }),
-      fetch('http://localhost:3000/tasks', { headers: { 'Authorization': 'Bearer ' + token } }),
-      fetch('http://localhost:3000/auth/me', { headers: { 'Authorization': 'Bearer ' + token } }),
+      fetch(API_URL + '/transactions', { headers: { 'Authorization': 'Bearer ' + token } }),
+      fetch(API_URL + '/accounts', { headers: { 'Authorization': 'Bearer ' + token } }),
+      fetch(API_URL + '/tasks', { headers: { 'Authorization': 'Bearer ' + token } }),
+      fetch(API_URL + '/auth/me', { headers: { 'Authorization': 'Bearer ' + token } }),
     ]);
     setTransactions(await txRes.json());
     setAccounts(await accRes.json());

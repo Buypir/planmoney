@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Wallet, CheckCircl
 import Topbar, { REFRESH_EVENT } from '../components/Topbar';
 import StatCard from '../components/StatCard';
 import { useSettings } from '../context/SettingsContext';
+import { API_URL } from '../config';
 
 function Calendar() {
   const { t, settings } = useSettings();
@@ -20,8 +21,8 @@ function Calendar() {
 
   const loadData = async () => {
     const [txRes, taskRes] = await Promise.all([
-      fetch('http://localhost:3000/transactions', { headers: authHeaders }),
-      fetch('http://localhost:3000/tasks', { headers: authHeaders }),
+      fetch(API_URL + '/transactions', { headers: authHeaders }),
+      fetch(API_URL + '/tasks', { headers: authHeaders }),
     ]);
     setTransactions(await txRes.json());
     setTasks(await taskRes.json());
@@ -99,7 +100,7 @@ function Calendar() {
 
   const toggleTaskDone = async (task) => {
     const newStatus = task.status === 'done' ? 'todo' : 'done';
-    await fetch(`http://localhost:3000/tasks/${task.id}`, {
+    await fetch(`${API_URL}/tasks/${task.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', ...authHeaders },
       body: JSON.stringify({ title: task.title, category: task.category, priority: task.priority, status: newStatus, dueDate: task.dueDate, note: task.note }),

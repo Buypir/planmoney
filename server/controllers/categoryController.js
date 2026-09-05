@@ -25,28 +25,32 @@ const createCategory = async (req, res) => {
   res.json(newCategory);
 };
 
-// Оновити категорію за id
+// Оновити категорію за id (лише якщо вона належить поточному користувачу)
 const updateCategory = async (req, res) => {
   const { id } = req.params;
   const { name, type, color } = req.body;
 
-  const updated = await prisma.category.update({
-    where: { id: Number(id) },
-    data: { name, type, color },
-  });
-
-  res.json(updated);
+  try {
+    const updated = await prisma.category.update({
+      where: { id: Number(id), userId: req.userId },
+      data: { name, type, color },
+    });
+    res.json(updated);
+  } catch {
+    res.status(404).json({ error: 'Категорію не знайдено' });
+  }
 };
 
-// Видалити категорію за id
+// Видалити категорію за id (лише якщо вона належить поточному користувачу)
 const deleteCategory = async (req, res) => {
   const { id } = req.params;
 
-  await prisma.category.delete({
-    where: { id: Number(id) },
-  });
-
-  res.json({ message: 'Категорію видалено' });
+  try {
+    await prisma.category.delete({ where: { id: Number(id), userId: req.userId } });
+    res.json({ message: 'Категорію видалено' });
+  } catch {
+    res.status(404).json({ error: 'Категорію не знайдено' });
+  }
 };
 
 module.exports = { getAllCategories, createCategory, updateCategory, deleteCategory };

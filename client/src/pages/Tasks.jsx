@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { CheckCircle, Clock, AlertCircle, ListTodo, Plus, Trash2, Pencil, ChevronLeft, ChevronRight } from 'lucide-react';
 import Topbar, { REFRESH_EVENT } from '../components/Topbar';
 import { useSettings } from '../context/SettingsContext';
+import { API_URL } from '../config';
 
 const PER_PAGE = 8;
 
@@ -92,7 +93,7 @@ function Tasks() {
   const token = localStorage.getItem('token');
 
   const fetchTasks = async () => {
-    const res = await fetch('http://localhost:3000/tasks', {
+    const res = await fetch(API_URL + '/tasks', {
       headers: { 'Authorization': 'Bearer ' + token },
     });
     setTasks(await res.json());
@@ -102,8 +103,8 @@ function Tasks() {
     let active = true;
     (async () => {
       const [res, catRes] = await Promise.all([
-        fetch('http://localhost:3000/tasks', { headers: { 'Authorization': 'Bearer ' + token } }),
-        fetch('http://localhost:3000/categories', { headers: { 'Authorization': 'Bearer ' + token } }),
+        fetch(API_URL + '/tasks', { headers: { 'Authorization': 'Bearer ' + token } }),
+        fetch(API_URL + '/categories', { headers: { 'Authorization': 'Bearer ' + token } }),
       ]);
       const data = await res.json();
       if (active) { setTasks(data); setSavedCategories(await catRes.json()); }
@@ -124,7 +125,7 @@ function Tasks() {
 
   const handleAdd = async () => {
     if (!form.title) return;
-    await fetch('http://localhost:3000/tasks', {
+    await fetch(API_URL + '/tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
       body: JSON.stringify(buildPayload(form)),
@@ -134,7 +135,7 @@ function Tasks() {
   };
 
   const handleDelete = async (id) => {
-    await fetch(`http://localhost:3000/tasks/${id}`, {
+    await fetch(`${API_URL}/tasks/${id}`, {
       method: 'DELETE',
       headers: { 'Authorization': 'Bearer ' + token },
     });
@@ -143,7 +144,7 @@ function Tasks() {
 
   const toggleDone = async (task) => {
     const newStatus = task.status === 'done' ? 'todo' : 'done';
-    await fetch(`http://localhost:3000/tasks/${task.id}`, {
+    await fetch(`${API_URL}/tasks/${task.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
       body: JSON.stringify({ title: task.title, category: task.category, priority: task.priority, status: newStatus, dueDate: task.dueDate, note: task.note }),
@@ -165,7 +166,7 @@ function Tasks() {
 
   const saveEdit = async () => {
     if (!editForm.title) return;
-    await fetch(`http://localhost:3000/tasks/${editingTask.id}`, {
+    await fetch(`${API_URL}/tasks/${editingTask.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
       body: JSON.stringify(buildPayload(editForm)),
