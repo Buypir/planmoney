@@ -14,8 +14,15 @@ function Sparkline({ color, data }) {
   );
 }
 
-function StatCard({ icon: Icon, iconColor, iconBg, label, value, change, changeSuffix, caption, trendColor, trendData }) {
+function StatCard({ icon: Icon, iconColor, iconBg, label, value, change, changeSuffix, higherIsBetter = true, caption, trendColor, trendData }) {
   const { t } = useSettings();
+
+  // Колір показує, добра це новина чи погана, а не просто знак числа:
+  // зростання витрат — не привід для зеленого
+  const isZeroChange = /^[+-]?0%$/.test(change || '');
+  const isDecrease = (change || '').startsWith('-');
+  const isGoodChange = higherIsBetter ? !isDecrease : isDecrease;
+  const changeColor = isZeroChange ? 'text-gray-400' : isGoodChange ? 'text-green-600' : 'text-red-500';
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
@@ -33,7 +40,7 @@ function StatCard({ icon: Icon, iconColor, iconBg, label, value, change, changeS
             <p className="text-xs mt-1 text-gray-400">{caption}</p>
           )}
           {!caption && change && (
-            <p className={`text-xs mt-1 ${change.startsWith('-') ? 'text-red-500' : 'text-green-600'}`}>
+            <p className={`text-xs mt-1 ${changeColor}`}>
               {change} {changeSuffix || t('stat_since_yesterday')}
             </p>
           )}

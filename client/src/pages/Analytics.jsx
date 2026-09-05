@@ -180,7 +180,7 @@ function Analytics() {
           change={fmtChange(incomeChange)} changeSuffix={changeSuffix} />
         <StatCard icon={TrendingDown} iconColor="text-red-500" iconBg="bg-red-50 dark:bg-red-500/20"
           label={t('analytics_expense_period', periodLabel)} value={formatMoney(expense, 'UAH', settings?.language)}
-          change={fmtChange(expenseChange)} changeSuffix={changeSuffix} />
+          change={fmtChange(expenseChange)} changeSuffix={changeSuffix} higherIsBetter={false} />
         <StatCard icon={Wallet} iconColor="text-accent-500" iconBg="bg-accent-50 dark:bg-accent-500/20"
           label={t('analytics_net_result')} value={formatMoney(balance, 'UAH', settings?.language)}
           change={fmtChange(balanceChange)} changeSuffix={changeSuffix} />

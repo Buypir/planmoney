@@ -266,7 +266,7 @@ function Finance() {
           change={incomeChange} changeSuffix={changeSuffix} trendColor="#40c057" trendData={incomeTrend} />
         <StatCard icon={TrendingDown} iconColor="text-red-500" iconBg="bg-red-50 dark:bg-red-500/20"
           label={t('finance_expense')} value={formatMoney(expense, 'UAH', settings?.language)}
-          change={expenseChange} changeSuffix={changeSuffix} trendColor="#fa5252" trendData={expenseTrend} />
+          change={expenseChange} changeSuffix={changeSuffix} higherIsBetter={false} trendColor="#fa5252" trendData={expenseTrend} />
         <StatCard icon={PiggyBank} iconColor="text-accent-500" iconBg="bg-accent-50 dark:bg-accent-500/20"
           label={t('finance_balance')} value={formatMoney(balance, 'UAH', settings?.language)}
           trendColor="#f76707" trendData={balanceTrend} />
