@@ -1,5 +1,6 @@
 // Логіка для транзакцій
 const prisma = require('../prismaClient');
+const { getRates } = require('./exchangeRateController');
 
 // Перевіряє, що рахунок (якщо вказаний) належить поточному користувачу
 const verifyOwnAccounts = async (userId, ...accountIds) => {
@@ -7,6 +8,23 @@ const verifyOwnAccounts = async (userId, ...accountIds) => {
   if (ids.length === 0) return true;
   const count = await prisma.account.count({ where: { id: { in: ids }, userId } });
   return count === new Set(ids).size;
+};
+
+// Скільки надійде на рахунок-отримувач у його валюті. Курс НБУ фіксується
+// на момент операції — інакше сума старого переказу «пливла б» разом із курсом.
+const convertForTransfer = async (amount, fromAccountId, toAccountId) => {
+  if (!fromAccountId || !toAccountId) return amount;
+
+  const [from, to] = await Promise.all([
+    prisma.account.findUnique({ where: { id: fromAccountId } }),
+    prisma.account.findUnique({ where: { id: toAccountId } }),
+  ]);
+  if (!from || !to || from.currency === to.currency) return amount;
+
+  const rates = await getRates();
+  const inUAH = amount * (from.currency === 'UAH' ? 1 : rates[from.currency]);
+  const converted = to.currency === 'UAH' ? inUAH : inUAH / rates[to.currency];
+  return Math.round(converted);
 };
 
 // Отримати всі транзакції
@@ -25,6 +43,15 @@ const createTransaction = async (req, res) => {
     return res.status(403).json({ error: 'Рахунок не знайдено' });
   }
 
+  let toAmount;
+  if (type === 'transfer') {
+    try {
+      toAmount = await convertForTransfer(amount, accountId, toAccountId);
+    } catch {
+      return res.status(502).json({ error: 'Не вдалося отримати курс НБУ для переказу. Спробуй пізніше.' });
+    }
+  }
+
   const newTransaction = await prisma.transaction.create({
     data: {
       amount,
@@ -34,6 +61,7 @@ const createTransaction = async (req, res) => {
       status: status || undefined,
       accountId: accountId ?? undefined,
       toAccountId: toAccountId ?? undefined,
+      toAmount,
       userId: req.userId, // було: userId: 1
     },
   });
@@ -50,10 +78,19 @@ const updateTransaction = async (req, res) => {
     return res.status(403).json({ error: 'Рахунок не знайдено' });
   }
 
+  let toAmount = null;
+  if (type === 'transfer') {
+    try {
+      toAmount = await convertForTransfer(amount, accountId, toAccountId);
+    } catch {
+      return res.status(502).json({ error: 'Не вдалося отримати курс НБУ для переказу. Спробуй пізніше.' });
+    }
+  }
+
   try {
     const updated = await prisma.transaction.update({
       where: { id: Number(id), userId: req.userId },
-      data: { amount, type, category, note, status, accountId, toAccountId },
+      data: { amount, type, category, note, status, accountId, toAccountId, toAmount },
     });
     res.json(updated);
   } catch {

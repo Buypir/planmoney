@@ -9,21 +9,29 @@ const fetchRate = async (code) => {
   return data[0]?.rate;
 };
 
-const getExchangeRates = async (req, res) => {
+// Курси у вигляді { UAH: 1, USD: 44.5, EUR: 51.7 }. Кидає помилку, якщо НБУ недоступний
+// і в кеші ще нічого немає — краще відмовити, ніж порахувати за вигаданим курсом.
+const getRates = async () => {
   const now = Date.now();
-  if (cache && now - cachedAt < CACHE_TTL_MS) {
-    return res.json(cache);
-  }
+  if (cache && now - cachedAt < CACHE_TTL_MS) return cache;
 
   try {
     const [usd, eur] = await Promise.all([fetchRate('USD'), fetchRate('EUR')]);
     cache = { UAH: 1, USD: usd, EUR: eur, updatedAt: new Date().toISOString() };
     cachedAt = now;
-    res.json(cache);
+    return cache;
+  } catch (error) {
+    if (cache) return cache;
+    throw error;
+  }
+};
+
+const getExchangeRates = async (req, res) => {
+  try {
+    res.json(await getRates());
   } catch {
-    if (cache) return res.json(cache);
     res.status(502).json({ error: 'Не вдалося отримати курс НБУ' });
   }
 };
 
-module.exports = { getExchangeRates };
+module.exports = { getExchangeRates, getRates };

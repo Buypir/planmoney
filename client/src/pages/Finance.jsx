@@ -141,9 +141,10 @@ function Finance() {
     const transferOut = transactions
       .filter((tx) => tx.accountId === id && tx.type === 'transfer')
       .reduce((s, tx) => s + tx.amount, 0);
+    // На рахунок-отримувач зараховується toAmount — сума вже в його валюті
     const transferIn = transactions
       .filter((tx) => tx.toAccountId === id && tx.type === 'transfer')
-      .reduce((s, tx) => s + tx.amount, 0);
+      .reduce((s, tx) => s + (tx.toAmount ?? tx.amount), 0);
     return inFlow - outFlow - transferOut + transferIn;
   };
 
@@ -326,6 +327,11 @@ function Finance() {
                       </td>
                       <td className={`py-3 pr-3 text-right font-semibold whitespace-nowrap ${typeAmountColor[tx.type]}`}>
                         {typeSign[tx.type]}{formatMoney(tx.amount, accountCurrency(tx.accountId, accountsById), settings?.language)}
+                        {tx.type === 'transfer' && tx.toAmount != null && tx.toAmount !== tx.amount && (
+                          <span className="text-gray-400 font-normal">
+                            {' → '}{formatMoney(tx.toAmount, accountCurrency(tx.toAccountId, accountsById), settings?.language)}
+                          </span>
+                        )}
                       </td>
                       <td className="py-3 pr-3">
                         <span className="text-xs px-2 py-1 rounded-full bg-green-50 dark:bg-green-500/20 text-green-600">

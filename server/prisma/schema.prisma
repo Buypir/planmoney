@@ -53,6 +53,9 @@ model Transaction {
   account     Account? @relation("AccountTransactions", fields: [accountId], references: [id])
   toAccountId Int?
   toAccount   Account? @relation("ToAccountTransactions", fields: [toAccountId], references: [id])
+  // Сума, зарахована на рахунок-отримувач, у ЙОГО валюті. Для переказів між
+  // рахунками різних валют рахується за курсом НБУ на момент операції.
+  toAmount    Int?
 
   userId    Int
   user      User     @relation(fields: [userId], references: [id])
