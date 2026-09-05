@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   User, Bell, Palette, Wallet, Download, Upload, Archive,
   Target, Plus, Trash2, Star, Sun, Moon, Monitor,
@@ -60,7 +61,11 @@ function Settings() {
   const [newCatName, setNewCatName] = useState('');
   const [newCatColor, setNewCatColor] = useState(CATEGORY_COLORS[0]);
 
-  const { settings, saveSettings: saveSettingsCtx, t } = useSettings();
+  const { settings, saveSettings: saveSettingsCtx, reloadSettings, t } = useSettings();
+  const navigate = useNavigate();
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteError, setDeleteError] = useState('');
   const [budgetDraft, setBudgetDraft] = useState('');
 
   const [goals, setGoals] = useState([]);
@@ -171,6 +176,23 @@ function Settings() {
     .filter((t) => t.type === 'expense' && new Date(t.date).getMonth() === now.getMonth() && new Date(t.date).getFullYear() === now.getFullYear())
     .reduce((s, t) => s + t.amount, 0);
   const budgetPercent = settings.monthlyBudget ? Math.min(Math.round((monthExpense / settings.monthlyBudget) * 100), 100) : 0;
+
+  const handleDeleteAccount = async () => {
+    setDeleteError('');
+    const res = await fetch(API_URL + '/auth/me', {
+      method: 'DELETE',
+      headers: jsonHeaders,
+      body: JSON.stringify({ password: deletePassword }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setDeleteError(data.error || t('delete_account_failed'));
+      return;
+    }
+    localStorage.removeItem('token');
+    await reloadSettings();
+    navigate('/login');
+  };
 
   const currentAccent = resolveAccentHex(settings.accentColor);
   const isCustomAccent = !PRESET_ACCENTS.some((c) => c.hex.toLowerCase() === currentAccent.toLowerCase());
@@ -561,6 +583,46 @@ function Settings() {
             <p className="text-xs text-gray-300">{t('budget_set_hint')}</p>
           )}
         </div>
+      </div>
+
+      {/* Видалення акаунта */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-red-100 dark:border-red-500/30 mt-4">
+        <h2 className="font-semibold text-red-600 dark:text-red-400 mb-1">{t('danger_zone_title')}</h2>
+        <p className="text-xs text-gray-400 mb-4">{t('delete_account_desc')}</p>
+
+        {!deletingAccount ? (
+          <button
+            onClick={() => setDeletingAccount(true)}
+            className="text-sm border border-red-300 dark:border-red-500/50 text-red-600 dark:text-red-400 rounded-lg px-4 py-2 font-medium hover:bg-red-50 dark:hover:bg-red-500/10"
+          >
+            {t('delete_account_button')}
+          </button>
+        ) : (
+          <div className="max-w-sm">
+            <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">{t('delete_account_password_label')}</label>
+            <input
+              type="password"
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
+              className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg px-3 py-2 mb-3"
+            />
+            {deleteError && <p className="text-xs text-red-500 mb-3">{deleteError}</p>}
+            <div className="flex gap-2">
+              <button
+                onClick={() => { setDeletingAccount(false); setDeletePassword(''); setDeleteError(''); }}
+                className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg py-2 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                {t('common_cancel')}
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                className="flex-1 bg-red-600 text-white rounded-lg py-2 text-sm font-semibold hover:bg-red-700"
+              >
+                {t('delete_account_confirm')}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

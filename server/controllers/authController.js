@@ -94,4 +94,30 @@ const updateProfile = async (req, res) => {
   res.json({ id: updated.id, email: updated.email, name: updated.name });
 };
 
-module.exports = { register, login, getMe, updateProfile };
+// Видалити власний акаунт разом з усіма даними. Пароль перепитуємо, щоб
+// чужа людина не стерла все з відкритої вкладки.
+const deleteMe = async (req, res) => {
+  const { password } = req.body;
+
+  const user = await prisma.user.findUnique({ where: { id: req.userId } });
+  if (!user) return res.status(404).json({ error: 'Користувача не знайдено' });
+
+  if (!password || !(await bcrypt.compare(password, user.password))) {
+    return res.status(400).json({ error: 'Невірний пароль' });
+  }
+
+  // Порядок важливий: спершу те, що посилається на інші таблиці
+  await prisma.$transaction([
+    prisma.transaction.deleteMany({ where: { userId: req.userId } }),
+    prisma.account.deleteMany({ where: { userId: req.userId } }),
+    prisma.task.deleteMany({ where: { userId: req.userId } }),
+    prisma.category.deleteMany({ where: { userId: req.userId } }),
+    prisma.goal.deleteMany({ where: { userId: req.userId } }),
+    prisma.setting.deleteMany({ where: { userId: req.userId } }),
+    prisma.user.delete({ where: { id: req.userId } }),
+  ]);
+
+  res.json({ message: 'Акаунт видалено' });
+};
+
+module.exports = { register, login, getMe, updateProfile, deleteMe };
