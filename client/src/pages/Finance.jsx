@@ -356,7 +356,48 @@ function Finance() {
           {filtered.length === 0 ? (
             <p className="text-gray-400 text-sm py-4">{t('finance_no_transactions')}</p>
           ) : (
-            <div className="overflow-x-auto">
+            <>
+            {/* На вузьких екранах таблиця не вміщається, тож там кожна операція — окрема картка */}
+            <div className="flex flex-col gap-2 md:hidden">
+              {filtered.map((tx) => (
+                <div key={tx.id} className="flex items-start gap-3 border border-gray-100 dark:border-gray-700 rounded-xl p-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${typeBg[tx.type]}`}>
+                    {typeIcon[tx.type]}
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <p className="text-gray-800 dark:text-gray-100 font-medium truncate">
+                      {tx.type === 'transfer' ? t('finance_type_transfer') : tx.category}
+                    </p>
+                    <p className="text-xs text-gray-400 truncate">
+                      {new Date(tx.date).toLocaleDateString(settings?.language === 'en' ? 'en-US' : 'uk-UA')}
+                      {' · '}
+                      {tx.type === 'transfer'
+                        ? `${accountName(tx.accountId)} → ${accountName(tx.toAccountId)}`
+                        : accountName(tx.accountId)}
+                    </p>
+                    {tx.note && <p className="text-xs text-gray-400 truncate">{tx.note}</p>}
+                  </div>
+
+                  <div className="flex flex-col items-end shrink-0">
+                    <span className={`text-sm font-semibold whitespace-nowrap ${typeAmountColor[tx.type]}`}>
+                      {typeSign[tx.type]}{formatMoney(tx.amount, accountCurrency(tx.accountId, accountsById), settings?.language)}
+                    </span>
+                    {tx.type === 'transfer' && tx.toAmount != null && tx.toAmount !== tx.amount && (
+                      <span className="text-xs text-gray-400 whitespace-nowrap">
+                        → {formatMoney(tx.toAmount, accountCurrency(tx.toAccountId, accountsById), settings?.language)}
+                      </span>
+                    )}
+                    <button onClick={() => handleDelete(tx.id)} aria-label={t('accounts_delete_tooltip')}
+                      className="text-gray-400 hover:text-red-500 text-xl leading-none px-2 py-1 -mr-2">
+                      ×
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="overflow-x-auto hidden md:block">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="text-left text-xs text-gray-400 border-b border-gray-100 dark:border-gray-700">
@@ -415,6 +456,7 @@ function Finance() {
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </div>
 
