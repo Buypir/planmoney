@@ -142,7 +142,6 @@ model Setting {
   // Фінансові налаштування
   currency      String   @default("UAH")
   monthStart    Int      @default(1)
-  rounding      String   @default("none")
   language      String   @default("uk")
 
   // Бюджет

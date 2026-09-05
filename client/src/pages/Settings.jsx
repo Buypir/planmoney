@@ -24,12 +24,6 @@ const CURRENCIES = [
   { key: 'EUR', labelKey: 'currency_eur' },
 ];
 
-const ROUNDINGS = [
-  { key: 'none', labelKey: 'rounding_none' },
-  { key: '10', labelKey: 'rounding_cents' },
-  { key: '100', labelKey: 'rounding_hryvnia' },
-];
-
 const LANGUAGES = [
   { key: 'uk', labelKey: 'lang_uk' },
   { key: 'en', labelKey: 'lang_en' },
@@ -463,16 +457,6 @@ function Settings() {
                 {Array.from({ length: 28 }, (_, i) => i + 1).map((d) => (
                   <option key={d} value={d}>{t('month_start_day', d)}</option>
                 ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">{t('rounding_label')}</label>
-              <select
-                value={settings.rounding}
-                onChange={(e) => saveSettings({ rounding: e.target.value })}
-                className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg px-3 py-2 text-sm"
-              >
-                {ROUNDINGS.map((r) => <option key={r.key} value={r.key}>{t(r.labelKey)}</option>)}
               </select>
             </div>
             <div>

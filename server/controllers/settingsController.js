@@ -23,7 +23,6 @@ const updateSettings = async (req, res) => {
     accentColor,
     currency,
     monthStart,
-    rounding,
     language,
     monthlyBudget,
   } = req.body;
@@ -37,7 +36,6 @@ const updateSettings = async (req, res) => {
     accentColor,
     currency,
     monthStart,
-    rounding,
     language,
     monthlyBudget,
   };

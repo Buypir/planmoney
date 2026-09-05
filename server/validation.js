@@ -24,7 +24,6 @@ const CATEGORY_TYPES = ['task', 'income', 'expense'];
 const CURRENCIES = ['UAH', 'USD', 'EUR'];
 const THEMES = ['light', 'dark', 'system'];
 const LANGUAGES = ['uk', 'en'];
-const ROUNDINGS = ['none', '10', '100'];
 
 function validateTransaction({ amount, type, category, note, accountId, toAccountId }) {
   const amountError = invalidAmount(amount);
@@ -73,7 +72,6 @@ function validateSettings(data) {
   if (data.theme !== undefined && !THEMES.includes(data.theme)) return 'Невідома тема';
   if (data.language !== undefined && !LANGUAGES.includes(data.language)) return 'Невідома мова';
   if (data.currency !== undefined && !CURRENCIES.includes(data.currency)) return 'Невідома валюта';
-  if (data.rounding !== undefined && !ROUNDINGS.includes(data.rounding)) return 'Невідоме округлення';
   if (data.monthStart !== undefined && (!Number.isInteger(data.monthStart) || data.monthStart < 1 || data.monthStart > 28)) {
     return 'Початок місяця має бути числом від 1 до 28';
   }
