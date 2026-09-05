@@ -5,7 +5,7 @@ import StatCard from '../components/StatCard';
 import ExpenseChart from '../components/ExpenseChart';
 import { useSettings } from '../context/SettingsContext';
 import { getPeriodRange, getPreviousPeriodRange, inRange, pctChange, fmtChange, last7DaysTrend } from '../period';
-import { baseTransactions, accountCurrency, convertFromUAH, formatMoney } from '../money';
+import { baseTransactions, accountCurrency, sumInCurrency, formatMoney } from '../money';
 import { API_URL } from '../config';
 
 const changeSuffixKey = { today: 'stat_since_yesterday', week: 'stat_vs_prev_week', month: 'stat_vs_prev_month', year: 'stat_vs_prev_year' };
@@ -148,14 +148,14 @@ function Finance() {
     return inFlow - outFlow - transferOut + transferIn;
   };
 
-  // Загальний баланс — кожен рахунок конвертується в UAH за курсом НБУ, тоді підсумок показується у валюті з налаштувань
-  const totalBalanceUAH = accounts.reduce((s, acc) => {
-    const balanceInAccountCurrency = accountBalance(acc.id);
-    const rate = acc.currency === 'UAH' ? 1 : (rates?.[acc.currency] || 1);
-    return s + balanceInAccountCurrency * rate;
-  }, 0);
+  // Залишки на рахунках у розрізі валют, і вже з них — підсумок у валюті з налаштувань
+  const accountsByCurrency = accounts.reduce((totals, acc) => {
+    totals[acc.currency] = (totals[acc.currency] || 0) + accountBalance(acc.id);
+    return totals;
+  }, {});
+  const heldCurrencies = Object.keys(accountsByCurrency);
   const displayCurrency = settings?.currency || 'UAH';
-  const totalAccountsBalance = convertFromUAH(totalBalanceUAH, displayCurrency, rates);
+  const totalAccountsBalance = sumInCurrency(accountsByCurrency, displayCurrency, rates);
 
   const accountName = (id) => accounts.find((acc) => acc.id === id)?.name || '—';
 
@@ -379,6 +379,19 @@ function Finance() {
                     </div>
                   </div>
                 ))}
+                {/* Розбивка за валютами — показуємо лише коли валют справді кілька */}
+                {heldCurrencies.length > 1 && (
+                  <div className="flex flex-col gap-1 pt-2 border-t border-gray-100 dark:border-gray-700">
+                    {heldCurrencies.map((currency) => (
+                      <div key={currency} className="flex items-center justify-between text-xs">
+                        <span className="text-gray-400">{currency}</span>
+                        <span className="text-gray-600 dark:text-gray-300 font-medium">
+                          {formatMoney(accountsByCurrency[currency], currency, settings?.language)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
                   <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">{t('accounts_total_balance')}</span>
                   <span className="text-sm font-bold text-gray-800 dark:text-gray-100">

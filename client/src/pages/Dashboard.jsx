@@ -7,7 +7,7 @@ import ExpenseChart from '../components/ExpenseChart';
 import IncomeExpenseChart from '../components/IncomeExpenseChart';
 import { useSettings } from '../context/SettingsContext';
 import { getPeriodRange, getPreviousPeriodRange, inRange, pctChange, fmtChange, last7DaysTrend } from '../period';
-import { baseTransactions, accountCurrency, convertFromUAH, formatMoney } from '../money';
+import { baseTransactions, accountCurrency, balanceByCurrency, sumInCurrency, formatMoney } from '../money';
 import { API_URL } from '../config';
 
 const changeSuffixKey = { today: 'stat_since_yesterday', week: 'stat_vs_prev_week', month: 'stat_vs_prev_month', year: 'stat_vs_prev_year' };
@@ -45,11 +45,15 @@ function Dashboard() {
   const accountsById = Object.fromEntries(accounts.map((acc) => [acc.id, acc]));
   const baseTx = baseTransactions(transactions, accountsById, rates);
 
-  const allTimeIncome = baseTx.filter((tx) => tx.type === 'income').reduce((s, tx) => s + tx.amount, 0);
-  const allTimeExpense = baseTx.filter((tx) => tx.type === 'expense').reduce((s, tx) => s + tx.amount, 0);
-  const balanceUAH = allTimeIncome - allTimeExpense;
   const displayCurrency = settings?.currency || 'UAH';
-  const balance = convertFromUAH(balanceUAH, displayCurrency, rates);
+  // Залишок рахуємо в розрізі валют, а вже тоді зводимо в одну — інакше
+  // різні валюти складались би як однакові числа
+  const byCurrency = balanceByCurrency(transactions, accountsById);
+  const balance = sumInCurrency(byCurrency, displayCurrency, rates);
+  const heldCurrencies = Object.keys(byCurrency);
+  const balanceBreakdown = heldCurrencies.length > 1
+    ? heldCurrencies.map((c) => formatMoney(byCurrency[c], c, settings?.language)).join(' · ')
+    : t('dashboard_balance_caption');
   const tasksDone = tasks.filter((task) => task.status === 'done').length;
   const tasksTotal = tasks.length;
 
@@ -111,7 +115,7 @@ function Dashboard() {
           change={expenseChange} changeSuffix={changeSuffix} trendColor="#fa5252" trendData={expenseTrend} />
         <StatCard icon={Wallet} iconColor="text-accent-500" iconBg="bg-accent-50 dark:bg-accent-500/20"
           label={t('dashboard_balance')} value={formatMoney(balance, displayCurrency, settings?.language)}
-          caption={t('dashboard_balance_caption')} trendColor="#f76707" trendData={balanceTrend} />
+          caption={balanceBreakdown} trendColor="#f76707" trendData={balanceTrend} />
         <StatCard icon={CheckCircle} iconColor="text-purple-500" iconBg="bg-purple-50 dark:bg-purple-500/20"
           label={t('dashboard_tasks_completed')} value={`${tasksDone} / ${tasksTotal}`}
           trendColor="#7048e8" trendData={tasksTrend} />

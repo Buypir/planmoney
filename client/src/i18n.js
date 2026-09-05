@@ -105,7 +105,7 @@ export const translations = {
     stat_vs_prev_year: 'від мин. року',
 
     dashboard_greeting: (name) => `Добрий вечір, ${name} 👋`,
-    dashboard_balance_caption: 'Загальний баланс',
+    dashboard_balance_caption: 'Усі доходи мінус витрати',
     dashboard_income: 'Дохід',
     dashboard_expense: 'Витрати',
     dashboard_balance: 'Баланс',
@@ -189,7 +189,7 @@ export const translations = {
     accounts_add_placeholder: 'Назва рахунку',
     accounts_add_button: '+ Додати рахунок',
     accounts_delete_tooltip: 'Видалити',
-    accounts_total_balance: 'Загальний баланс',
+    accounts_total_balance: 'Разом на рахунках',
 
     tasks_title: 'Задачі',
     tasks_subtitle: 'Організуй свої справи та досягай цілей',
@@ -417,7 +417,7 @@ export const translations = {
     stat_vs_prev_year: 'vs last year',
 
     dashboard_greeting: (name) => `Good evening, ${name} 👋`,
-    dashboard_balance_caption: 'Total balance',
+    dashboard_balance_caption: 'All income minus expenses',
     dashboard_income: 'Income',
     dashboard_expense: 'Expenses',
     dashboard_balance: 'Balance',
@@ -501,7 +501,7 @@ export const translations = {
     accounts_add_placeholder: 'Account name',
     accounts_add_button: '+ Add account',
     accounts_delete_tooltip: 'Delete',
-    accounts_total_balance: 'Total balance',
+    accounts_total_balance: 'Total across accounts',
 
     tasks_title: 'Tasks',
     tasks_subtitle: 'Organize your tasks and reach your goals',

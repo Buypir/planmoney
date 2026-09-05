@@ -21,6 +21,36 @@ export function convertFromUAH(amountUAH, toCurrency, rates) {
   return amountUAH / rates[toCurrency];
 }
 
+// Залишки в розрізі валют за всіма операціями. Працює з «сирими» транзакціями,
+// бо кожна сума тут має лишатись у валюті свого рахунку (операції без рахунку — гривневі).
+export function balanceByCurrency(transactions, accountsById) {
+  const totals = {};
+  const add = (currency, value) => {
+    if (!value) return;
+    totals[currency] = (totals[currency] || 0) + value;
+  };
+
+  for (const tx of transactions) {
+    const currency = accountCurrency(tx.accountId, accountsById);
+    if (tx.type === 'income') add(currency, tx.amount);
+    else if (tx.type === 'expense') add(currency, -tx.amount);
+    else if (tx.type === 'transfer') {
+      add(currency, -tx.amount);
+      add(accountCurrency(tx.toAccountId, accountsById), tx.toAmount ?? tx.amount);
+    }
+  }
+  return totals;
+}
+
+// Підсумок різновалютних залишків в одній валюті за курсом НБУ
+export function sumInCurrency(byCurrency, toCurrency, rates) {
+  const uah = Object.entries(byCurrency).reduce(
+    (sum, [currency, value]) => sum + value * (currency === 'UAH' ? 1 : (rates?.[currency] || 1)),
+    0,
+  );
+  return convertFromUAH(uah, toCurrency, rates);
+}
+
 const SYMBOLS = { UAH: 'грн', USD: '$', EUR: '€' };
 const SYMBOLS_EN = { UAH: 'UAH', USD: '$', EUR: '€' };
 
