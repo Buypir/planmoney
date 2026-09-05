@@ -1,4 +1,4 @@
-import { Routes, Route, Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Link, Outlet, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { LogOut, Menu, X } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
@@ -10,6 +10,20 @@ import Settings from './pages/Settings';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import { useSettings } from './context/SettingsContext';
+
+// Без токена будь-яка сторінка застосунку веде на вхід
+function RequireAuth({ children }) {
+  const { token } = useSettings();
+  if (!token) return <Navigate to="/login" replace />;
+  return children;
+}
+
+// А залогіненому користувачу немає що робити на сторінках входу й реєстрації
+function GuestOnly({ children }) {
+  const { token } = useSettings();
+  if (token) return <Navigate to="/" replace />;
+  return children;
+}
 
 function AppLayout() {
   const { t, reloadSettings } = useSettings();
@@ -86,9 +100,9 @@ function AppLayout() {
 function App() {
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route element={<AppLayout />}>
+      <Route path="/login" element={<GuestOnly><Login /></GuestOnly>} />
+      <Route path="/register" element={<GuestOnly><Register /></GuestOnly>} />
+      <Route element={<RequireAuth><AppLayout /></RequireAuth>}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/tasks" element={<Tasks />} />
@@ -96,6 +110,8 @@ function App() {
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
+      {/* Будь-яка невідома адреса веде на дашборд, а той — на вхід, якщо не залогінений */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

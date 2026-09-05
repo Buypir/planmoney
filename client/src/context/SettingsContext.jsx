@@ -15,21 +15,35 @@ export function SettingsProvider({ children }) {
   const [isDark, setIsDark] = useState(false);
   const [period, setPeriod] = useState('month');
   const [rates, setRates] = useState(null);
+  // Токен тримаємо в стані, а не читаємо з localStorage при кожному рендері:
+  // інакше охоронці роутів не дізнаються, що він зник
+  const [token, setToken] = useState(() => localStorage.getItem('token'));
 
   // Викликається на старті й після входу/виходу — інакше налаштування
   // залишились би порожніми до перезавантаження сторінки
   const reloadSettings = useCallback(async () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
+    const storedToken = localStorage.getItem('token');
+    setToken(storedToken);
+    if (!storedToken) {
       setSettings(null);
       setRates(null);
       return;
     }
-    const headers = { Authorization: 'Bearer ' + token };
+    const headers = { Authorization: 'Bearer ' + storedToken };
     const [settingsRes, ratesRes] = await Promise.all([
       fetch(API_URL + '/settings', { headers }),
       fetch(API_URL + '/exchange-rates', { headers }),
     ]);
+
+    // Токен протух або недійсний — прибираємо його, щоб застосунок повів на вхід
+    if (settingsRes.status === 401) {
+      localStorage.removeItem('token');
+      setToken(null);
+      setSettings(null);
+      setRates(null);
+      return;
+    }
+
     setSettings(settingsRes.ok ? await settingsRes.json() : null);
     setRates(ratesRes.ok ? await ratesRes.json() : null);
   }, []);
@@ -78,7 +92,7 @@ export function SettingsProvider({ children }) {
   const t = (key, ...args) => translate(settings?.language || 'uk', key, ...args);
 
   return (
-    <SettingsContext.Provider value={{ settings, saveSettings, reloadSettings, t, isDark, period, setPeriod, rates }}>
+    <SettingsContext.Provider value={{ settings, saveSettings, reloadSettings, token, t, isDark, period, setPeriod, rates }}>
       {children}
     </SettingsContext.Provider>
   );
