@@ -23,6 +23,7 @@ model User {
   goals        Goal[]
   setting      Setting?
   accounts     Account[]
+  recurrings   Recurring[]
 }
 
 // Таблиця рахунків користувача
@@ -39,6 +40,7 @@ model Account {
 
   transactions      Transaction[] @relation("AccountTransactions")
   incomingTransfers Transaction[] @relation("ToAccountTransactions")
+  recurrings        Recurring[]
 }
 
 // Таблиця транзакцій (доходи, витрати, перекази)
@@ -77,6 +79,27 @@ model Task {
 
   userId    Int
   user      User      @relation(fields: [userId], references: [id])
+}
+
+// Регулярні операції: зарплата, підписки, оренда. Самі операції створюються
+// не за розкладом, а при першому зверненні після настання дати — так нічого
+// не губиться, навіть якщо сервер був вимкнений.
+model Recurring {
+  id        Int      @id @default(autoincrement())
+  amount    Int
+  type      String
+  category  String
+  note      String?
+  interval  String   // day | week | month | year
+  nextRun   DateTime
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  accountId Int?
+  account   Account? @relation(fields: [accountId], references: [id])
+
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 // Таблиця категорій

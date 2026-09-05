@@ -2,6 +2,7 @@
 const prisma = require('../prismaClient');
 const { getRates } = require('./exchangeRateController');
 const { validateTransaction } = require('../validation');
+const { runDueRecurrings } = require('./recurringController');
 
 // Перевіряє, що рахунок (якщо вказаний) належить поточному користувачу
 const verifyOwnAccounts = async (userId, ...accountIds) => {
@@ -30,6 +31,9 @@ const convertForTransfer = async (amount, fromAccountId, toAccountId) => {
 
 // Отримати всі транзакції
 const getAllTransactions = async (req, res) => {
+  // Спершу дописуємо операції за регулярними правилами, час яких настав
+  await runDueRecurrings(req.userId);
+
   const transactions = await prisma.transaction.findMany({
     where: { userId: req.userId },
   });

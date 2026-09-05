@@ -13,6 +13,7 @@ const goalRoutes = require('./routes/goalRoutes');
 const settingsRoutes = require('./routes/settingsRoutes');
 const accountRoutes = require('./routes/accountRoutes');
 const exchangeRateRoutes = require('./routes/exchangeRateRoutes');
+const recurringRoutes = require('./routes/recurringRoutes');
 
 // Middleware
 const authMiddleware = require('./middleware/authMiddleware');
@@ -49,6 +50,7 @@ app.use('/goals', authMiddleware, goalRoutes);
 app.use('/settings', authMiddleware, settingsRoutes);
 app.use('/accounts', authMiddleware, accountRoutes);
 app.use('/exchange-rates', authMiddleware, exchangeRateRoutes);
+app.use('/recurrings', authMiddleware, recurringRoutes);
 
 // Уловлює всі необроблені помилки — щоб клієнту не потрапляв stack trace
 // eslint-disable-next-line no-unused-vars
