@@ -105,7 +105,7 @@ export const translations = {
     stat_vs_prev_month: 'від мин. місяця',
     stat_vs_prev_year: 'від мин. року',
 
-    dashboard_greeting: (name) => `Добрий вечір, ${name} 👋`,
+    dashboard_greeting: (name) => `Привіт, ${name} 👋`,
     dashboard_balance_caption: 'Усі доходи мінус витрати',
     dashboard_income: 'Дохід',
     dashboard_expense: 'Витрати',
@@ -418,7 +418,7 @@ export const translations = {
     stat_vs_prev_month: 'vs last month',
     stat_vs_prev_year: 'vs last year',
 
-    dashboard_greeting: (name) => `Good evening, ${name} 👋`,
+    dashboard_greeting: (name) => `Hi, ${name} 👋`,
     dashboard_balance_caption: 'All income minus expenses',
     dashboard_income: 'Income',
     dashboard_expense: 'Expenses',
