@@ -313,7 +313,7 @@ function Settings() {
                         </div>
                         <button
                           onClick={() => deleteCategory(c.id)}
-                          className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="text-gray-300 hover:text-red-500 row-action"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>

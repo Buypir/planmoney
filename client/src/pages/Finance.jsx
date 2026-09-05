@@ -406,7 +406,7 @@ function Finance() {
                       </td>
                       <td className="py-3 text-right">
                         <button onClick={() => handleDelete(tx.id)}
-                          className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity text-lg">
+                          className="text-gray-300 hover:text-red-500 row-action text-lg">
                           ×
                         </button>
                       </td>
@@ -439,11 +439,11 @@ function Finance() {
                         {formatMoney(accountBalance(acc.id), acc.currency, settings?.language)}
                       </span>
                       <button onClick={() => handleArchiveAccount(acc.id, true)} title={t('accounts_archive_tooltip')}
-                        className="text-gray-300 hover:text-accent-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                        className="text-gray-300 hover:text-accent-600 row-action">
                         <Archive className="w-3.5 h-3.5" />
                       </button>
                       <button onClick={() => handleDeleteAccount(acc.id)} title={t('accounts_delete_tooltip')}
-                        className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                        className="text-gray-300 hover:text-red-500 row-action">
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -461,7 +461,7 @@ function Finance() {
                             {formatMoney(accountBalance(acc.id), acc.currency, settings?.language)}
                           </span>
                           <button onClick={() => handleArchiveAccount(acc.id, false)}
-                            className="text-xs text-accent-600 hover:text-accent-700 opacity-0 group-hover:opacity-100 transition-opacity">
+                            className="text-xs text-accent-600 hover:text-accent-700 row-action">
                             {t('accounts_restore')}
                           </button>
                         </div>
@@ -495,13 +495,13 @@ function Finance() {
               <p className="text-xs text-red-500 mb-2">{accountError}</p>
             )}
 
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <input
                 type="text"
                 value={newAccountName}
                 onChange={(e) => setNewAccountName(e.target.value)}
                 placeholder={t('accounts_add_placeholder')}
-                className="flex-1 min-w-0 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg px-3 py-2 text-sm"
+                className="flex-1 min-w-32 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg px-3 py-2 text-sm"
               />
               <select value={newAccountCurrency} onChange={(e) => setNewAccountCurrency(e.target.value)}
                 className="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg px-2 py-2 text-sm shrink-0">
@@ -542,11 +542,11 @@ function Finance() {
                       </span>
                       <button onClick={() => handleToggleRecurring(rule.id, !rule.active)}
                         title={rule.active ? t('recurring_pause') : t('recurring_resume')}
-                        className="text-xs text-accent-600 hover:text-accent-700 opacity-0 group-hover:opacity-100 transition-opacity">
+                        className="text-xs text-accent-600 hover:text-accent-700 row-action">
                         {rule.active ? t('recurring_pause') : t('recurring_resume')}
                       </button>
                       <button onClick={() => handleDeleteRecurring(rule.id)}
-                        className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                        className="text-gray-300 hover:text-red-500 row-action">
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>

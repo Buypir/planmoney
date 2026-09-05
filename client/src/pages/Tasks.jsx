@@ -389,11 +389,11 @@ function Tasks() {
                   <span className={`text-xs px-2 py-1 rounded-full ${priorityStyle[task.priority]}`}>{priorityLabel[task.priority]}</span>
                   <span className={`text-xs px-2 py-1 rounded-full ${statusStyle[task.status]}`}>{statusLabel[task.status]}</span>
                   <button onClick={() => openEdit(task)} title={t('tasks_edit_tooltip')}
-                    className="text-gray-300 hover:text-accent-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                    className="text-gray-300 hover:text-accent-500 row-action">
                     <Pencil className="w-4 h-4" />
                   </button>
                   <button onClick={() => handleDelete(task.id)} title={t('tasks_delete_tooltip')}
-                    className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                    className="text-gray-300 hover:text-red-500 row-action">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
