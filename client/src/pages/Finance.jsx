@@ -5,7 +5,7 @@ import StatCard from '../components/StatCard';
 import ExpenseChart from '../components/ExpenseChart';
 import { useSettings } from '../context/SettingsContext';
 import { getPeriodRange, getPreviousPeriodRange, inRange, pctChange, fmtChange, last7DaysTrend } from '../period';
-import { baseTransactions, accountCurrency, sumInCurrency, formatMoney } from '../money';
+import { baseTransactions, accountCurrency, sumInCurrency, formatMoney, toMinor } from '../money';
 import { API_URL } from '../config';
 
 const changeSuffixKey = { today: 'stat_since_yesterday', week: 'stat_vs_prev_week', month: 'stat_vs_prev_month', year: 'stat_vs_prev_year' };
@@ -66,7 +66,7 @@ function Finance() {
       method: 'POST',
       headers: jsonHeaders,
       body: JSON.stringify({
-        amount: Number(amount),
+        amount: toMinor(amount),
         type,
         // Переказ не має категорії: назву показуємо з типу, інакше вона застигла б однією мовою
         category: type === 'transfer' ? '' : category,
@@ -219,13 +219,13 @@ function Finance() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard icon={TrendingUp} iconColor="text-green-600" iconBg="bg-green-50 dark:bg-green-500/20"
-          label={t('finance_income')} value={`${income.toLocaleString()} ${t('currency_suffix')}`}
+          label={t('finance_income')} value={formatMoney(income, 'UAH', settings?.language)}
           change={incomeChange} changeSuffix={changeSuffix} trendColor="#40c057" trendData={incomeTrend} />
         <StatCard icon={TrendingDown} iconColor="text-red-500" iconBg="bg-red-50 dark:bg-red-500/20"
-          label={t('finance_expense')} value={`${expense.toLocaleString()} ${t('currency_suffix')}`}
+          label={t('finance_expense')} value={formatMoney(expense, 'UAH', settings?.language)}
           change={expenseChange} changeSuffix={changeSuffix} trendColor="#fa5252" trendData={expenseTrend} />
         <StatCard icon={PiggyBank} iconColor="text-accent-500" iconBg="bg-accent-50 dark:bg-accent-500/20"
-          label={t('finance_balance')} value={`${balance.toLocaleString()} ${t('currency_suffix')}`}
+          label={t('finance_balance')} value={formatMoney(balance, 'UAH', settings?.language)}
           trendColor="#f76707" trendData={balanceTrend} />
         <StatCard icon={Percent} iconColor="text-purple-500" iconBg="bg-purple-50 dark:bg-purple-500/20"
           label={t('finance_savings')} value={`${savingsPercent}%`}

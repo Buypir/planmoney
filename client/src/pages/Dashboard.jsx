@@ -120,10 +120,10 @@ function Dashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={TrendingUp} iconColor="text-green-600" iconBg="bg-green-50 dark:bg-green-500/20"
-          label={t('dashboard_income')} value={`${income.toLocaleString()} ${t('currency_suffix')}`}
+          label={t('dashboard_income')} value={formatMoney(income, 'UAH', settings?.language)}
           change={incomeChange} changeSuffix={changeSuffix} trendColor="#40c057" trendData={incomeTrend} />
         <StatCard icon={TrendingDown} iconColor="text-red-500" iconBg="bg-red-50 dark:bg-red-500/20"
-          label={t('dashboard_expense')} value={`${expense.toLocaleString()} ${t('currency_suffix')}`}
+          label={t('dashboard_expense')} value={formatMoney(expense, 'UAH', settings?.language)}
           change={expenseChange} changeSuffix={changeSuffix} trendColor="#fa5252" trendData={expenseTrend} />
         <StatCard icon={Wallet} iconColor="text-accent-500" iconBg="bg-accent-50 dark:bg-accent-500/20"
           label={t('dashboard_balance')} value={formatMoney(balance, displayCurrency, settings?.language)}

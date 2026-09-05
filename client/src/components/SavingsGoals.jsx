@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { Target, Plus, Trash2 } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 import { API_URL } from '../config';
+import { toMinor, formatMoney } from '../money';
 
 function SavingsGoals({ onUpdate }) {
-  const { t } = useSettings();
+  const { t, settings } = useSettings();
   const [goals, setGoals] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState('');
@@ -42,7 +43,7 @@ function SavingsGoals({ onUpdate }) {
     await fetch(API_URL + '/goals', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ title, targetAmount: Number(targetAmount) }),
+      body: JSON.stringify({ title, targetAmount: toMinor(targetAmount) }),
     });
     setTitle('');
     setTargetAmount('');
@@ -58,8 +59,8 @@ function SavingsGoals({ onUpdate }) {
 
   const confirmAdd = async () => {
     setAddError('');
-    const amount = Number(addAmount);
-    if (!addAmount || isNaN(amount) || amount <= 0) return;
+    const amount = toMinor(addAmount);
+    if (amount === null || amount <= 0) return;
 
     const res = await fetch(`${API_URL}/goals/${addingGoal.id}/add`, {
       method: 'PUT',
@@ -150,8 +151,8 @@ function SavingsGoals({ onUpdate }) {
                   </div>
                 </div>
                 <div className="flex items-end gap-2 mb-1">
-                  <span className="text-lg font-bold text-accent-600">{goal.savedAmount.toLocaleString()} {t('currency_suffix')}</span>
-                  <span className="text-gray-400 text-xs mb-0.5">/ {goal.targetAmount.toLocaleString()} {t('currency_suffix')}</span>
+                  <span className="text-lg font-bold text-accent-600">{formatMoney(goal.savedAmount, 'UAH', settings?.language)}</span>
+                  <span className="text-gray-400 text-xs mb-0.5">/ {formatMoney(goal.targetAmount, 'UAH', settings?.language)}</span>
                 </div>
                 <div className="w-full h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                   <div
@@ -185,7 +186,7 @@ function SavingsGoals({ onUpdate }) {
             />
 
             <p className="text-xs text-gray-400 mb-1">
-              {t('goals_modal_remaining', (addingGoal.targetAmount - addingGoal.savedAmount).toLocaleString())}
+              {t('goals_modal_remaining', formatMoney(addingGoal.targetAmount - addingGoal.savedAmount, 'UAH', settings?.language))}
             </p>
             <p className="text-xs text-gray-400 mb-3">{t('goals_modal_hint')}</p>
 

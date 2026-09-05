@@ -88,7 +88,7 @@ export const translations = {
     no_goals: 'Цілей ще немає — додай на сторінці Фінанси',
     monthly_budget_label: 'Місячний бюджет (грн)',
     monthly_budget_placeholder: 'Наприклад, 30000',
-    budget_used: (used, total, pct) => `Використано цього місяця: ${used} / ${total} грн (${pct}%)`,
+    budget_used: (used, total, pct) => `Використано цього місяця: ${used} / ${total} (${pct}%)`,
     budget_set_hint: 'Встанови місячний бюджет, щоб бачити прогрес витрат',
 
     csv_date: 'Дата',
@@ -413,7 +413,7 @@ export const translations = {
     no_goals: 'No goals yet — add one on the Finance page',
     monthly_budget_label: 'Monthly budget (UAH)',
     monthly_budget_placeholder: 'E.g. 30000',
-    budget_used: (used, total, pct) => `Used this month: ${used} / ${total} UAH (${pct}%)`,
+    budget_used: (used, total, pct) => `Used this month: ${used} / ${total} (${pct}%)`,
     budget_set_hint: 'Set a monthly budget to track your spending progress',
 
     csv_date: 'Date',

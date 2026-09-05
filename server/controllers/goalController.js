@@ -3,6 +3,9 @@ const prisma = require('../prismaClient');
 const { validateGoal } = require('../validation');
 const { getRates } = require('./exchangeRateController');
 
+// Суми зберігаються в копійках — у текст помилки виводимо звичні гривні
+const uah = (minor) => (minor / 100).toFixed(2);
+
 // Отримати всі цілі користувача
 const getAllGoals = async (req, res) => {
   const goals = await prisma.goal.findMany({ where: { userId: req.userId } });
@@ -40,7 +43,7 @@ const addToGoal = async (req, res) => {
   // 1. Ліміт цілі
   const remaining = goal.targetAmount - goal.savedAmount;
   if (sum > remaining) {
-    return res.status(400).json({ error: `Забагато. До цілі залишилось лише ${remaining} грн` });
+    return res.status(400).json({ error: `Забагато. До цілі залишилось лише ${uah(remaining)} грн` });
   }
 
   // 2. Перевірка балансу. Суми з валютних рахунків переводимо в гривню за курсом НБУ,
@@ -65,7 +68,7 @@ const addToGoal = async (req, res) => {
   const expense = transactions.filter((t) => t.type === 'expense').reduce((s, t) => s + inUAH(t), 0);
   const balance = Math.round(income - expense);
   if (sum > balance) {
-    return res.status(400).json({ error: `Недостатньо коштів. На балансі: ${balance} грн` });
+    return res.status(400).json({ error: `Недостатньо коштів. На балансі: ${uah(balance)} грн` });
   }
 
   const updated = await prisma.goal.update({

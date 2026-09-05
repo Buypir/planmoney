@@ -7,7 +7,7 @@ import ExpenseChart from '../components/ExpenseChart';
 import { useSettings } from '../context/SettingsContext';
 import { getChartColors } from '../chartTheme';
 import { getPeriodRange, getPreviousPeriodRange, inRange, pctChange, fmtChange } from '../period';
-import { baseTransactions } from '../money';
+import { baseTransactions, formatMoney, fromMinor } from '../money';
 import { API_URL } from '../config';
 
 function startOfWeek(date) {
@@ -122,10 +122,12 @@ function Analytics() {
   const donePercent = tasksTotal ? Math.round((tasksDone / tasksTotal) * 100) : 0;
 
   const monthsShort = t('months_short');
-  const dailyData = buildPeriodBuckets(range, period, baseTx, monthsShort);
+  // Графіки малюємо у гривнях: у копійках вісь показувала б шестизначні числа
+  const dailyDataMinor = buildPeriodBuckets(range, period, baseTx, monthsShort);
+  const dailyData = dailyDataMinor.map((b) => ({ ...b, income: fromMinor(b.income), expense: fromMinor(b.expense) }));
 
   const bestIncomeDay = (period === 'week' || period === 'month')
-    ? dailyData.reduce((best, d) => (d.income > (best?.income || 0) ? d : best), null)
+    ? dailyDataMinor.reduce((best, d) => (d.income > (best?.income || 0) ? d : best), null)
     : null;
 
   const byCategory = {};
@@ -141,7 +143,7 @@ function Analytics() {
     const txs = txInMonth(d.getFullYear(), d.getMonth());
     const inc = sumByType(txs, 'income');
     const exp = sumByType(txs, 'expense');
-    monthlyComparison.push({ month: monthsShort[d.getMonth()], income: inc, expense: exp, net: inc - exp });
+    monthlyComparison.push({ month: monthsShort[d.getMonth()], income: fromMinor(inc), expense: fromMinor(exp), net: fromMinor(inc - exp) });
   }
 
   const weeklyTasks = [];
@@ -174,13 +176,13 @@ function Analytics() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard icon={TrendingUp} iconColor="text-green-600" iconBg="bg-green-50 dark:bg-green-500/20"
-          label={t('analytics_income_period', periodLabel)} value={`${income.toLocaleString()} ${t('currency_suffix')}`}
+          label={t('analytics_income_period', periodLabel)} value={formatMoney(income, 'UAH', settings?.language)}
           change={fmtChange(incomeChange)} changeSuffix={changeSuffix} />
         <StatCard icon={TrendingDown} iconColor="text-red-500" iconBg="bg-red-50 dark:bg-red-500/20"
-          label={t('analytics_expense_period', periodLabel)} value={`${expense.toLocaleString()} ${t('currency_suffix')}`}
+          label={t('analytics_expense_period', periodLabel)} value={formatMoney(expense, 'UAH', settings?.language)}
           change={fmtChange(expenseChange)} changeSuffix={changeSuffix} />
         <StatCard icon={Wallet} iconColor="text-accent-500" iconBg="bg-accent-50 dark:bg-accent-500/20"
-          label={t('analytics_net_result')} value={`${balance.toLocaleString()} ${t('currency_suffix')}`}
+          label={t('analytics_net_result')} value={formatMoney(balance, 'UAH', settings?.language)}
           change={fmtChange(balanceChange)} changeSuffix={changeSuffix} />
         <StatCard icon={CheckCircle} iconColor="text-purple-500" iconBg="bg-purple-50 dark:bg-purple-500/20"
           label={t('analytics_tasks_progress')} value={`${donePercent}%`}
@@ -202,7 +204,7 @@ function Analytics() {
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartColors.grid} />
                 <XAxis dataKey="day" tick={{ fontSize: 10, fill: chartColors.tick }} axisLine={false} tickLine={false} interval={period === 'week' || period === 'year' ? 0 : 4} />
                 <YAxis tick={{ fontSize: 11, fill: chartColors.tick }} axisLine={false} tickLine={false} width={40} />
-                <Tooltip formatter={(v) => `${v.toLocaleString()} ${t('currency_suffix')}`}
+                <Tooltip formatter={(v) => formatMoney(v * 100, 'UAH', settings?.language)}
                   contentStyle={{ borderRadius: 12, border: `1px solid ${chartColors.tooltipBorder}`, fontSize: 13, backgroundColor: chartColors.tooltipBg, color: chartColors.tooltipText }} cursor={{ fill: chartColors.cursor }} />
                 <Bar dataKey="income" fill="#40c057" radius={[2, 2, 0, 0]} />
                 <Bar dataKey="expense" fill="#fa5252" radius={[2, 2, 0, 0]} />
@@ -223,7 +225,7 @@ function Analytics() {
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartColors.grid} />
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: chartColors.tick }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: chartColors.tick }} axisLine={false} tickLine={false} width={40} />
-                <Tooltip formatter={(v) => `${v.toLocaleString()} ${t('currency_suffix')}`}
+                <Tooltip formatter={(v) => formatMoney(v * 100, 'UAH', settings?.language)}
                   contentStyle={{ borderRadius: 12, border: `1px solid ${chartColors.tooltipBorder}`, fontSize: 13, backgroundColor: chartColors.tooltipBg, color: chartColors.tooltipText }} cursor={{ fill: chartColors.cursor }} />
                 <Legend wrapperStyle={{ fontSize: 12, color: chartColors.tick }} formatter={(v) => (v === 'income' ? t('chart_income') : v === 'expense' ? t('chart_expense') : t('chart_net_result'))} />
                 <Bar dataKey="income" fill="#40c057" radius={[2, 2, 0, 0]} />
@@ -266,7 +268,7 @@ function Analytics() {
             <div>
               <p className="text-xs text-gray-400">{t('analytics_top_expense_category')}</p>
               <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
-                {topCategory ? `${topCategory} — ${topCategoryAmount.toLocaleString()} ${t('currency_suffix')}` : t('analytics_no_data')}
+                {topCategory ? `${topCategory} — ${formatMoney(topCategoryAmount, 'UAH', settings?.language)}` : t('analytics_no_data')}
               </p>
             </div>
           </div>

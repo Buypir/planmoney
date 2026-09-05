@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, Plus, ListPlus } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 import { API_URL } from '../config';
+import { toMinor, formatMoney } from '../money';
 
 export const REFRESH_EVENT = 'planmoney:refresh';
 
@@ -170,7 +171,7 @@ function AddTransactionModal({ onClose }) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
       body: JSON.stringify({
-        amount: Number(amount),
+        amount: toMinor(amount),
         type,
         // Переказ не має категорії: назву показуємо з типу, інакше вона застигла б однією мовою
         category: type === 'transfer' ? '' : category,
@@ -282,7 +283,7 @@ function AddTransactionModal({ onClose }) {
 }
 
 function SearchBox() {
-  const { t } = useSettings();
+  const { t, settings } = useSettings();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState(null);
@@ -381,7 +382,7 @@ function SearchBox() {
                     {tx.note && <span className="text-gray-400 dark:text-gray-500"> · {tx.note}</span>}
                   </span>
                   <span className={tx.type === 'income' ? 'text-green-500' : 'text-red-500'}>
-                    {tx.type === 'income' ? '+' : '-'}{tx.amount}
+                    {tx.type === 'income' ? '+' : '-'}{formatMoney(tx.amount, 'UAH', settings?.language)}
                   </span>
                 </button>
               ))}

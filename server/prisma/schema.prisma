@@ -44,6 +44,7 @@ model Account {
 // Таблиця транзакцій (доходи, витрати, перекази)
 model Transaction {
   id        Int      @id @default(autoincrement())
+  // Усі суми зберігаються в копійках/центах: 100 грн -> 10000
   amount    Int
   type      String
   category  String

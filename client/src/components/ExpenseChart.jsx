@@ -1,10 +1,11 @@
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { useSettings } from '../context/SettingsContext';
+import { formatMoney, fromMinor } from '../money';
 
 const COLORS = ['#e8590c', '#f59f00', '#f76707', '#e64980', '#7048e8', '#495057', '#adb5bd'];
 
 function ExpenseChart({ transactions }) {
-  const { t } = useSettings();
+  const { t, settings } = useSettings();
   const expenses = transactions.filter((tx) => tx.type === 'expense');
 
   const byCategory = {};
@@ -37,7 +38,7 @@ function ExpenseChart({ transactions }) {
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-lg font-bold text-gray-800 dark:text-gray-100">{total.toLocaleString()}</span>
+              <span className="text-lg font-bold text-gray-800 dark:text-gray-100">{fromMinor(total).toLocaleString(settings?.language === 'en' ? 'en-US' : 'uk-UA', { maximumFractionDigits: 0 })}</span>
               <span className="text-xs text-gray-400">{t('expense_chart_total_suffix')}</span>
             </div>
           </div>
@@ -50,7 +51,7 @@ function ExpenseChart({ transactions }) {
                   <span className="text-gray-600 dark:text-gray-300">{entry.name}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-gray-800 dark:text-gray-100 font-medium">{entry.value.toLocaleString()} {t('currency_suffix')}</span>
+                  <span className="text-gray-800 dark:text-gray-100 font-medium">{formatMoney(entry.value, 'UAH', settings?.language)}</span>
                   <span className="text-gray-400 text-xs">{Math.round((entry.value / total) * 100)}%</span>
                 </div>
               </div>

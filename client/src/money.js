@@ -58,10 +58,25 @@ export function currencySymbol(currency, language) {
   return (language === 'en' ? SYMBOLS_EN : SYMBOLS)[currency] || currency;
 }
 
-// Копійки/центи для USD і EUR завжди округлюються до 2 знаків; гривня — без дробової частини
+// Усі суми в застосунку зберігаються в копійках/центах — так гроші не втрачають
+// дробову частину при перерахунках. Ці дві функції — єдиний міст до звичних одиниць.
+export const MINOR_UNITS = 100;
+
+export function fromMinor(amount) {
+  return (amount || 0) / MINOR_UNITS;
+}
+
+// Текст із поля вводу ("12,34" або "12.34") у копійки. null, якщо це не число.
+export function toMinor(input) {
+  const normalized = String(input).replace(',', '.').trim();
+  if (normalized === '' || !/^-?\d*\.?\d*$/.test(normalized)) return null;
+  const value = Number(normalized);
+  if (!Number.isFinite(value)) return null;
+  return Math.round(value * MINOR_UNITS);
+}
+
 export function formatMoney(amount, currency, language) {
-  const decimals = currency === 'UAH' ? 0 : 2;
   const locale = language === 'en' ? 'en-US' : 'uk-UA';
-  const formatted = amount.toLocaleString(locale, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  const formatted = fromMinor(amount).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   return `${formatted} ${currencySymbol(currency, language)}`;
 }

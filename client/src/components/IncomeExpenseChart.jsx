@@ -1,9 +1,10 @@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { useSettings } from '../context/SettingsContext';
+import { formatMoney, fromMinor } from '../money';
 import { getChartColors } from '../chartTheme';
 
 function IncomeExpenseChart({ transactions }) {
-  const { t, isDark } = useSettings();
+  const { t, isDark, settings } = useSettings();
   const chartColors = getChartColors(isDark);
   const months = t('months_short');
   const now = new Date();
@@ -22,8 +23,8 @@ function IncomeExpenseChart({ transactions }) {
     const key = `${d.getFullYear()}-${d.getMonth()}`;
     const idx = indexByKey[key];
     if (idx === undefined) continue;
-    if (tx.type === 'income') buckets[idx].income += tx.amount;
-    else buckets[idx].expense += tx.amount;
+    if (tx.type === 'income') buckets[idx].income += fromMinor(tx.amount);
+    else buckets[idx].expense += fromMinor(tx.amount);
   }
 
   return (
@@ -43,7 +44,7 @@ function IncomeExpenseChart({ transactions }) {
             <XAxis dataKey="month" tick={{ fontSize: 12, fill: chartColors.tick }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fontSize: 12, fill: chartColors.tick }} axisLine={false} tickLine={false} width={45} />
             <Tooltip
-              formatter={(value) => `${value.toLocaleString()} ${t('currency_suffix')}`}
+              formatter={(value) => formatMoney(value * 100, 'UAH', settings?.language)}
               contentStyle={{ borderRadius: 12, border: `1px solid ${chartColors.tooltipBorder}`, fontSize: 13, backgroundColor: chartColors.tooltipBg, color: chartColors.tooltipText }}
               cursor={{ fill: chartColors.cursor }}
             />

@@ -5,13 +5,15 @@ import Topbar, { REFRESH_EVENT } from '../components/Topbar';
 import StatCard from '../components/StatCard';
 import { useSettings } from '../context/SettingsContext';
 import { API_URL } from '../config';
+import { baseTransactions, accountCurrency, formatMoney } from '../money';
 
 function Calendar() {
-  const { t, settings } = useSettings();
+  const { t, settings, rates } = useSettings();
   const navigate = useNavigate();
   const WEEKDAYS = t('weekdays_short');
   const MONTHS = t('months_full');
   const [transactions, setTransactions] = useState([]);
+  const [accounts, setAccounts] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [current, setCurrent] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(new Date().getDate());
@@ -20,11 +22,13 @@ function Calendar() {
   const authHeaders = { Authorization: 'Bearer ' + token };
 
   const loadData = async () => {
-    const [txRes, taskRes] = await Promise.all([
+    const [txRes, accRes, taskRes] = await Promise.all([
       fetch(API_URL + '/transactions', { headers: authHeaders }),
+      fetch(API_URL + '/accounts', { headers: authHeaders }),
       fetch(API_URL + '/tasks', { headers: authHeaders }),
     ]);
     setTransactions(await txRes.json());
+    setAccounts(await accRes.json());
     setTasks(await taskRes.json());
   };
 
@@ -35,6 +39,9 @@ function Calendar() {
     return () => window.removeEventListener(REFRESH_EVENT, loadData);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const accountsById = Object.fromEntries(accounts.map((acc) => [acc.id, acc]));
+  const baseTx = baseTransactions(transactions, accountsById, rates);
 
   const year = current.getFullYear();
   const month = current.getMonth();
@@ -48,10 +55,10 @@ function Calendar() {
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
   const getDayData = (day) => {
-    const income = transactions
+    const income = baseTx
       .filter((tx) => { const dt = new Date(tx.date); return tx.type === 'income' && dt.getFullYear() === year && dt.getMonth() === month && dt.getDate() === day; })
       .reduce((s, tx) => s + tx.amount, 0);
-    const expense = transactions
+    const expense = baseTx
       .filter((tx) => { const dt = new Date(tx.date); return tx.type === 'expense' && dt.getFullYear() === year && dt.getMonth() === month && dt.getDate() === day; })
       .reduce((s, tx) => s + tx.amount, 0);
     const taskCount = tasks.filter((task) => {
@@ -68,7 +75,7 @@ function Calendar() {
   const prevMonth = () => { setCurrent(new Date(year, month - 1, 1)); setSelectedDay(null); };
   const nextMonth = () => { setCurrent(new Date(year, month + 1, 1)); setSelectedDay(null); };
 
-  const monthTransactions = transactions.filter((tx) => {
+  const monthTransactions = baseTx.filter((tx) => {
     const dt = new Date(tx.date);
     return dt.getFullYear() === year && dt.getMonth() === month;
   });
@@ -88,6 +95,12 @@ function Calendar() {
         return dt.getFullYear() === year && dt.getMonth() === month && dt.getDate() === selectedDay;
       })
     : [];
+  const dayBaseTx = selectedDay
+    ? baseTx.filter((tx) => {
+        const dt = new Date(tx.date);
+        return dt.getFullYear() === year && dt.getMonth() === month && dt.getDate() === selectedDay;
+      })
+    : [];
   const dayTasks = selectedDay
     ? tasks.filter((task) => {
         if (!task.dueDate) return false;
@@ -95,8 +108,8 @@ function Calendar() {
         return dt.getFullYear() === year && dt.getMonth() === month && dt.getDate() === selectedDay;
       })
     : [];
-  const dayIncome = dayTransactions.filter((tx) => tx.type === 'income').reduce((s, tx) => s + tx.amount, 0);
-  const dayExpense = dayTransactions.filter((tx) => tx.type === 'expense').reduce((s, tx) => s + tx.amount, 0);
+  const dayIncome = dayBaseTx.filter((tx) => tx.type === 'income').reduce((s, tx) => s + tx.amount, 0);
+  const dayExpense = dayBaseTx.filter((tx) => tx.type === 'expense').reduce((s, tx) => s + tx.amount, 0);
 
   const toggleTaskDone = async (task) => {
     const newStatus = task.status === 'done' ? 'todo' : 'done';
@@ -128,11 +141,11 @@ function Calendar() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         <StatCard icon={TrendingUp} iconColor="text-green-600" iconBg="bg-green-50 dark:bg-green-500/20"
-          label={t('calendar_income_month')} value={`${monthIncome.toLocaleString()} ${t('currency_suffix')}`} />
+          label={t('calendar_income_month')} value={formatMoney(monthIncome, 'UAH', settings?.language)} />
         <StatCard icon={TrendingDown} iconColor="text-red-500" iconBg="bg-red-50 dark:bg-red-500/20"
-          label={t('calendar_expense_month')} value={`${monthExpense.toLocaleString()} ${t('currency_suffix')}`} />
+          label={t('calendar_expense_month')} value={formatMoney(monthExpense, 'UAH', settings?.language)} />
         <StatCard icon={Wallet} iconColor="text-accent-500" iconBg="bg-accent-50 dark:bg-accent-500/20"
-          label={t('calendar_balance_month')} value={`${monthBalance.toLocaleString()} ${t('currency_suffix')}`} />
+          label={t('calendar_balance_month')} value={formatMoney(monthBalance, 'UAH', settings?.language)} />
         <StatCard icon={CheckCircle} iconColor="text-purple-500" iconBg="bg-purple-50 dark:bg-purple-500/20"
           label={t('calendar_tasks_done_month')} value={`${monthTasksDone} / ${monthTasks.length}`} />
       </div>
@@ -156,8 +169,8 @@ function Calendar() {
                   }`}>
                   <span className={`text-sm font-medium mb-1 ${isToday(day) ? 'text-accent-600' : 'text-gray-700 dark:text-gray-200'}`}>{day}</span>
                   <div className="flex flex-col gap-0.5 text-xs">
-                    {income > 0 && <span className="text-green-600">+{income.toLocaleString()} {t('currency_suffix')}</span>}
-                    {expense > 0 && <span className="text-red-500">-{expense.toLocaleString()} {t('currency_suffix')}</span>}
+                    {income > 0 && <span className="text-green-600">+{formatMoney(income, 'UAH', settings?.language)}</span>}
+                    {expense > 0 && <span className="text-red-500">-{formatMoney(expense, 'UAH', settings?.language)}</span>}
                     {taskCount > 0 && <span className="text-gray-400">{t('calendar_task_count', taskCount)}</span>}
                   </div>
                 </button>
@@ -180,15 +193,15 @@ function Calendar() {
                 <div className="flex flex-col gap-2 text-sm">
                   <div className="flex items-center justify-between">
                     <span className="text-gray-400">{t('calendar_income_month')}</span>
-                    <span className="text-green-600 font-medium">+{dayIncome.toLocaleString()} {t('currency_suffix')}</span>
+                    <span className="text-green-600 font-medium">+{formatMoney(dayIncome, 'UAH', settings?.language)}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-400">{t('calendar_expense_month')}</span>
-                    <span className="text-red-500 font-medium">-{dayExpense.toLocaleString()} {t('currency_suffix')}</span>
+                    <span className="text-red-500 font-medium">-{formatMoney(dayExpense, 'UAH', settings?.language)}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-400">{t('calendar_balance_month')}</span>
-                    <span className="text-accent-600 font-medium">{(dayIncome - dayExpense).toLocaleString()} {t('currency_suffix')}</span>
+                    <span className="text-accent-600 font-medium">{formatMoney(dayIncome - dayExpense, 'UAH', settings?.language)}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-400">{t('calendar_tasks_done_month')}</span>
@@ -237,7 +250,7 @@ function Calendar() {
                           {tx.type === 'transfer' ? t('finance_type_transfer') : tx.category}
                         </span>
                         <span className={tx.type === 'income' ? 'text-green-600 font-medium' : 'text-red-500 font-medium'}>
-                          {tx.type === 'income' ? '+' : '-'}{tx.amount.toLocaleString()} {t('currency_suffix')}
+                          {tx.type === 'income' ? '+' : '-'}{formatMoney(tx.amount, accountCurrency(tx.accountId, accountsById), settings?.language)}
                         </span>
                       </div>
                     ))}

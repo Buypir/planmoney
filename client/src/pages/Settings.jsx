@@ -8,6 +8,7 @@ import Topbar, { REFRESH_EVENT } from '../components/Topbar';
 import { useSettings } from '../context/SettingsContext';
 import { API_URL } from '../config';
 import { PRESET_ACCENTS, resolveAccentHex } from '../accent';
+import { formatMoney, fromMinor, toMinor } from '../money';
 
 const CATEGORY_TYPES = [
   { key: 'task', labelKey: 'category_task' },
@@ -99,7 +100,7 @@ function Settings() {
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (settings) setBudgetDraft(settings.monthlyBudget ?? '');
+    if (settings) setBudgetDraft(settings.monthlyBudget == null ? '' : fromMinor(settings.monthlyBudget));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings?.monthlyBudget]);
 
@@ -143,7 +144,7 @@ function Settings() {
       new Date(tx.date).toLocaleDateString(settings.language === 'en' ? 'en-US' : 'uk-UA'),
       typeLabel[tx.type] || tx.type,
       tx.category,
-      tx.amount,
+      fromMinor(tx.amount).toFixed(2),
       accountById[tx.accountId]?.currency || 'UAH',
       tx.type === 'transfer'
         ? `${accountById[tx.accountId]?.name || '—'} → ${accountById[tx.toAccountId]?.name || '—'}`
@@ -548,7 +549,7 @@ function Settings() {
                 />
               </div>
               <p className="text-xs text-gray-400">
-                {activeGoal.savedAmount.toLocaleString()} / {activeGoal.targetAmount.toLocaleString()} {t('currency_suffix')}
+                {formatMoney(activeGoal.savedAmount, 'UAH', settings.language)} / {formatMoney(activeGoal.targetAmount, 'UAH', settings.language)}
               </p>
             </div>
           ) : (
@@ -562,7 +563,7 @@ function Settings() {
             type="number"
             value={budgetDraft}
             onChange={(e) => setBudgetDraft(e.target.value)}
-            onBlur={() => saveSettings({ monthlyBudget: budgetDraft === '' ? null : Number(budgetDraft) })}
+            onBlur={() => saveSettings({ monthlyBudget: budgetDraft === '' ? null : toMinor(budgetDraft) })}
             placeholder={t('monthly_budget_placeholder')}
             className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg px-3 py-2 text-sm mb-2"
           />
@@ -576,7 +577,7 @@ function Settings() {
                 />
               </div>
               <p className="text-xs text-gray-400">
-                {t('budget_used', monthExpense.toLocaleString(), settings.monthlyBudget.toLocaleString(), budgetPercent)}
+                {t('budget_used', formatMoney(monthExpense, 'UAH', settings.language), formatMoney(settings.monthlyBudget, 'UAH', settings.language), budgetPercent)}
               </p>
             </>
           ) : (
