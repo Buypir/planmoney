@@ -63,4 +63,22 @@ const login = async (req, res) => {
   });
 };
 
-module.exports = { register, login };
+// Отримати профіль поточного користувача
+const getMe = async (req, res) => {
+  const user = await prisma.user.findUnique({ where: { id: req.userId } });
+  res.json({ id: user.id, email: user.email, name: user.name });
+};
+
+// Оновити ім'я поточного користувача
+const updateProfile = async (req, res) => {
+  const { name } = req.body;
+
+  const updated = await prisma.user.update({
+    where: { id: req.userId },
+    data: { name },
+  });
+
+  res.json({ id: updated.id, email: updated.email, name: updated.name });
+};
+
+module.exports = { register, login, getMe, updateProfile };

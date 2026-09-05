@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Target, Plus, Trash2 } from 'lucide-react';
+import { useSettings } from '../context/SettingsContext';
 
 function SavingsGoals({ onUpdate }) {
+  const { t } = useSettings();
   const [goals, setGoals] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState('');
@@ -66,7 +68,7 @@ function SavingsGoals({ onUpdate }) {
 
     const data = await res.json();
     if (!res.ok) {
-      setAddError(data.error || 'Помилка');
+      setAddError(data.error || t('goals_error_generic'));
       return;
     }
 
@@ -85,17 +87,17 @@ function SavingsGoals({ onUpdate }) {
   };
 
   return (
-    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Target className="w-5 h-5 text-orange-500" />
-          <h2 className="font-semibold text-gray-700">Цілі накопичення</h2>
+          <Target className="w-5 h-5 text-accent-500" />
+          <h2 className="font-semibold text-gray-700 dark:text-gray-200">{t('goals_title')}</h2>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="text-orange-600 text-sm font-medium hover:text-orange-700"
+          className="text-accent-600 text-sm font-medium hover:text-accent-700"
         >
-          {showForm ? 'Скасувати' : '+ Нова ціль'}
+          {showForm ? t('goals_cancel') : t('goals_new')}
         </button>
       </div>
 
@@ -105,27 +107,27 @@ function SavingsGoals({ onUpdate }) {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Назва (напр. Відпустка)"
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1 min-w-40"
+            placeholder={t('goals_name_placeholder')}
+            className="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg px-3 py-2 text-sm flex-1 min-w-40"
           />
           <input
             type="number"
             value={targetAmount}
             onChange={(e) => setTargetAmount(e.target.value)}
-            placeholder="Сума"
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-28"
+            placeholder={t('goals_amount_placeholder')}
+            className="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg px-3 py-2 text-sm w-28"
           />
           <button
             onClick={handleCreate}
-            className="bg-orange-600 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-orange-700"
+            className="bg-accent-600 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-accent-700"
           >
-            Створити
+            {t('goals_create')}
           </button>
         </div>
       )}
 
       {goals.length === 0 ? (
-        <p className="text-gray-400 text-sm">Цілей ще немає. Створи першу!</p>
+        <p className="text-gray-400 text-sm">{t('goals_none')}</p>
       ) : (
         <div className="flex flex-col gap-3 max-h-64 overflow-y-auto pr-2">
           {goals.map((goal) => {
@@ -134,30 +136,30 @@ function SavingsGoals({ onUpdate }) {
             return (
               <div key={goal.id}>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-gray-800 font-medium text-sm">{goal.title}</span>
+                  <span className="text-gray-800 dark:text-gray-100 font-medium text-sm">{goal.title}</span>
                   <div className="flex items-center gap-2">
                     {!isComplete && (
-                      <button onClick={() => openAddModal(goal)} className="text-green-600 hover:text-green-700" title="Поповнити">
+                      <button onClick={() => openAddModal(goal)} className="text-green-600 hover:text-green-700" title={t('goals_add_tooltip')}>
                         <Plus className="w-4 h-4" />
                       </button>
                     )}
-                    <button onClick={() => handleDelete(goal.id)} className="text-gray-300 hover:text-red-500" title="Видалити">
+                    <button onClick={() => handleDelete(goal.id)} className="text-gray-300 hover:text-red-500" title={t('goals_delete_tooltip')}>
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
                 <div className="flex items-end gap-2 mb-1">
-                  <span className="text-lg font-bold text-orange-600">{goal.savedAmount.toLocaleString()} грн</span>
-                  <span className="text-gray-400 text-xs mb-0.5">/ {goal.targetAmount.toLocaleString()} грн</span>
+                  <span className="text-lg font-bold text-accent-600">{goal.savedAmount.toLocaleString()} {t('currency_suffix')}</span>
+                  <span className="text-gray-400 text-xs mb-0.5">/ {goal.targetAmount.toLocaleString()} {t('currency_suffix')}</span>
                 </div>
-                <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                   <div
-                    className={`h-full rounded-full ${isComplete ? 'bg-green-500' : 'bg-orange-500'}`}
+                    className={`h-full rounded-full ${isComplete ? 'bg-green-500' : 'bg-accent-500'}`}
                     style={{ width: `${percent}%` }}
                   ></div>
                 </div>
                 <p className="text-xs text-gray-400 mt-1 text-right">
-                  {isComplete ? 'Досягнуто!' : `${percent}%`}
+                  {isComplete ? t('goals_achieved') : `${percent}%`}
                 </p>
               </div>
             );
@@ -167,39 +169,39 @@ function SavingsGoals({ onUpdate }) {
 
       {addingGoal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
-            <h3 className="text-lg font-bold text-gray-800 mb-1">Відкласти на ціль</h3>
-            <p className="text-sm text-gray-500 mb-4">{addingGoal.title}</p>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-sm shadow-xl">
+            <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-1">{t('goals_modal_title')}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{addingGoal.title}</p>
 
-            <label className="block text-sm text-gray-600 mb-1">Сума (грн)</label>
+            <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">{t('goals_modal_amount_label')}</label>
             <input
               type="number"
               value={addAmount}
               onChange={(e) => setAddAmount(e.target.value)}
               placeholder="1000"
               autoFocus
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-2"
+              className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg px-3 py-2 mb-2"
             />
 
             <p className="text-xs text-gray-400 mb-1">
-              До цілі залишилось: {(addingGoal.targetAmount - addingGoal.savedAmount).toLocaleString()} грн
+              {t('goals_modal_remaining', (addingGoal.targetAmount - addingGoal.savedAmount).toLocaleString())}
             </p>
-            <p className="text-xs text-gray-400 mb-3">Ця сума спишеться з твого балансу.</p>
+            <p className="text-xs text-gray-400 mb-3">{t('goals_modal_hint')}</p>
 
             {addError && <p className="text-red-500 text-sm mb-3">{addError}</p>}
 
             <div className="flex gap-2">
               <button
                 onClick={() => setAddingGoal(null)}
-                className="flex-1 border border-gray-300 text-gray-600 rounded-lg py-2 font-medium hover:bg-gray-50"
+                className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg py-2 font-medium hover:bg-gray-50 dark:hover:bg-gray-700"
               >
-                Скасувати
+                {t('goals_cancel')}
               </button>
               <button
                 onClick={confirmAdd}
-                className="flex-1 bg-orange-600 text-white rounded-lg py-2 font-semibold hover:bg-orange-700"
+                className="flex-1 bg-accent-600 text-white rounded-lg py-2 font-semibold hover:bg-accent-700"
               >
-                Відкласти
+                {t('goals_modal_confirm')}
               </button>
             </div>
           </div>

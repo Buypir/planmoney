@@ -11,7 +11,7 @@ const getAllTransactions = async (req, res) => {
 
 // Додати нову транзакцію
 const createTransaction = async (req, res) => {
-  const { amount, type, category, note } = req.body;
+  const { amount, type, category, note, status, accountId, toAccountId } = req.body;
 
   const newTransaction = await prisma.transaction.create({
     data: {
@@ -19,6 +19,9 @@ const createTransaction = async (req, res) => {
       type,
       category,
       note,
+      status: status || undefined,
+      accountId: accountId ?? undefined,
+      toAccountId: toAccountId ?? undefined,
       userId: req.userId, // було: userId: 1
     },
   });
@@ -29,11 +32,11 @@ const createTransaction = async (req, res) => {
 // Оновити транзакцію за id
 const updateTransaction = async (req, res) => {
   const { id } = req.params;
-  const { amount, type, category, note } = req.body;
+  const { amount, type, category, note, status, accountId, toAccountId } = req.body;
 
   const updated = await prisma.transaction.update({
     where: { id: Number(id) },
-    data: { amount, type, category, note },
+    data: { amount, type, category, note, status, accountId, toAccountId },
   });
 
   res.json(updated);

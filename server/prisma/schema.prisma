@@ -21,16 +21,38 @@ model User {
   tasks        Task[]
   categories   Category[]
   goals        Goal[]
+  setting      Setting?
+  accounts     Account[]
 }
 
-// Таблиця транзакцій (доходи та витрати)
+// Таблиця рахунків користувача
+model Account {
+  id        Int      @id @default(autoincrement())
+  name      String
+  currency  String   @default("UAH")
+  createdAt DateTime @default(now())
+
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+
+  transactions      Transaction[] @relation("AccountTransactions")
+  incomingTransfers Transaction[] @relation("ToAccountTransactions")
+}
+
+// Таблиця транзакцій (доходи, витрати, перекази)
 model Transaction {
   id        Int      @id @default(autoincrement())
   amount    Int
   type      String
   category  String
   note      String?
+  status    String   @default("completed")
   date      DateTime @default(now())
+
+  accountId   Int?
+  account     Account? @relation("AccountTransactions", fields: [accountId], references: [id])
+  toAccountId Int?
+  toAccount   Account? @relation("ToAccountTransactions", fields: [toAccountId], references: [id])
 
   userId    Int
   user      User     @relation(fields: [userId], references: [id])
@@ -72,4 +94,31 @@ model Goal {
 
   userId       Int
   user         User     @relation(fields: [userId], references: [id])
+}
+
+// Таблиця налаштувань користувача
+model Setting {
+  id            Int      @id @default(autoincrement())
+
+  // Сповіщення
+  notifyTasks   Boolean  @default(true)
+  notifyBudget  Boolean  @default(true)
+  notifyGoals   Boolean  @default(true)
+  emailDigest   Boolean  @default(false)
+
+  // Вигляд
+  theme         String   @default("light")
+  accentColor   String   @default("orange")
+
+  // Фінансові налаштування
+  currency      String   @default("UAH")
+  monthStart    Int      @default(1)
+  rounding      String   @default("none")
+  language      String   @default("uk")
+
+  // Бюджет
+  monthlyBudget Int?
+
+  userId        Int      @unique
+  user          User     @relation(fields: [userId], references: [id])
 }

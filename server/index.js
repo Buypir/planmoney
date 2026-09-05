@@ -9,6 +9,9 @@ const taskRoutes = require('./routes/taskRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const authRoutes = require('./routes/authRoutes');
 const goalRoutes = require('./routes/goalRoutes');
+const settingsRoutes = require('./routes/settingsRoutes');
+const accountRoutes = require('./routes/accountRoutes');
+const exchangeRateRoutes = require('./routes/exchangeRateRoutes');
 
 // Middleware
 const authMiddleware = require('./middleware/authMiddleware');
@@ -32,6 +35,9 @@ app.use('/tasks', authMiddleware, taskRoutes);
 app.use('/categories', authMiddleware, categoryRoutes);
 app.use('/auth', authRoutes);
 app.use('/goals', authMiddleware, goalRoutes);
+app.use('/settings', authMiddleware, settingsRoutes);
+app.use('/accounts', authMiddleware, accountRoutes);
+app.use('/exchange-rates', authMiddleware, exchangeRateRoutes);
 
 // Запускаємо сервер
 app.listen(PORT, () => {
