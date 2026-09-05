@@ -120,7 +120,7 @@ function SavingsGoals({ onUpdate }) {
           />
           <button
             onClick={handleCreate}
-            className="bg-accent-600 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-accent-700"
+            className="bg-accent-600 text-[var(--accent-ink)] rounded-lg px-4 py-2 text-sm font-semibold hover:bg-accent-700"
           >
             {t('goals_create')}
           </button>
@@ -200,7 +200,7 @@ function SavingsGoals({ onUpdate }) {
               </button>
               <button
                 onClick={confirmAdd}
-                className="flex-1 bg-accent-600 text-white rounded-lg py-2 font-semibold hover:bg-accent-700"
+                className="flex-1 bg-accent-600 text-[var(--accent-ink)] rounded-lg py-2 font-semibold hover:bg-accent-700"
               >
                 {t('goals_modal_confirm')}
               </button>

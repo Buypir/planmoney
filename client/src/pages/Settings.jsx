@@ -6,6 +6,7 @@ import {
 import Topbar, { REFRESH_EVENT } from '../components/Topbar';
 import { useSettings } from '../context/SettingsContext';
 import { API_URL } from '../config';
+import { PRESET_ACCENTS, resolveAccentHex } from '../accent';
 
 const CATEGORY_TYPES = [
   { key: 'task', labelKey: 'category_task' },
@@ -14,13 +15,6 @@ const CATEGORY_TYPES = [
 ];
 
 const CATEGORY_COLORS = ['#f76707', '#339af0', '#40c057', '#e64980', '#7048e8', '#495057'];
-const ACCENT_COLORS = [
-  { key: 'orange', hex: '#f76707' },
-  { key: 'blue', hex: '#339af0' },
-  { key: 'green', hex: '#40c057' },
-  { key: 'pink', hex: '#e64980' },
-  { key: 'purple', hex: '#7048e8' },
-];
 
 const CURRENCIES = [
   { key: 'UAH', labelKey: 'currency_uah' },
@@ -168,6 +162,9 @@ function Settings() {
     .reduce((s, t) => s + t.amount, 0);
   const budgetPercent = settings.monthlyBudget ? Math.min(Math.round((monthExpense / settings.monthlyBudget) * 100), 100) : 0;
 
+  const currentAccent = resolveAccentHex(settings.accentColor);
+  const isCustomAccent = !PRESET_ACCENTS.some((c) => c.hex.toLowerCase() === currentAccent.toLowerCase());
+
   return (
     <div>
       <Topbar />
@@ -217,7 +214,7 @@ function Settings() {
                 </button>
                 <button
                   onClick={saveProfile}
-                  className="flex-1 bg-accent-500 text-white rounded-lg py-1.5 text-sm font-semibold hover:bg-accent-600"
+                  className="flex-1 bg-accent-500 text-[var(--accent-ink)] rounded-lg py-1.5 text-sm font-semibold hover:bg-accent-600"
                 >
                   {t('profile_save')}
                 </button>
@@ -328,7 +325,7 @@ function Settings() {
                         </button>
                         <button
                           onClick={() => addCategory(ct.key)}
-                          className="flex-1 text-xs bg-accent-500 text-white rounded-lg py-1 font-semibold hover:bg-accent-600"
+                          className="flex-1 text-xs bg-accent-500 text-[var(--accent-ink)] rounded-lg py-1 font-semibold hover:bg-accent-600"
                         >
                           {t('category_confirm_add')}
                         </button>
@@ -364,7 +361,7 @@ function Settings() {
                   key={opt.key}
                   onClick={() => saveSettings({ theme: opt.key })}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium ${
-                    settings.theme === opt.key ? 'bg-accent-500 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                    settings.theme === opt.key ? 'bg-accent-500 text-[var(--accent-ink)]' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
                   }`}
                 >
                   <opt.icon className="w-3.5 h-3.5" />
@@ -374,15 +371,32 @@ function Settings() {
             </div>
 
             <p className="text-xs text-gray-400 mb-2">{t('accent_label')}</p>
-            <div className="flex items-center gap-2">
-              {ACCENT_COLORS.map((c) => (
+            <div className="flex items-center gap-2 flex-wrap">
+              {PRESET_ACCENTS.map((c) => (
                 <button
                   key={c.key}
-                  onClick={() => saveSettings({ accentColor: c.key })}
-                  className={`w-7 h-7 rounded-full ${settings.accentColor === c.key ? 'ring-2 ring-offset-2 ring-gray-400' : ''}`}
+                  onClick={() => saveSettings({ accentColor: c.hex })}
+                  title={c.hex}
+                  className={`w-7 h-7 rounded-full ${currentAccent.toLowerCase() === c.hex.toLowerCase() ? 'ring-2 ring-offset-2 ring-gray-400' : ''}`}
                   style={{ backgroundColor: c.hex }}
                 />
               ))}
+
+              {/* Будь-який власний колір */}
+              <label
+                className={`w-7 h-7 rounded-full cursor-pointer relative overflow-hidden ${isCustomAccent ? 'ring-2 ring-offset-2 ring-gray-400' : ''}`}
+                style={{ background: isCustomAccent ? currentAccent : 'conic-gradient(#f97316, #22c55e, #4dabf7, #a855f7, #ec4899, #f97316)' }}
+                title={t('accent_custom')}
+              >
+                <input
+                  type="color"
+                  value={currentAccent}
+                  onChange={(e) => saveSettings({ accentColor: e.target.value })}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                />
+              </label>
+
+              <span className="text-xs text-gray-400 font-mono">{currentAccent}</span>
             </div>
           </div>
         </div>

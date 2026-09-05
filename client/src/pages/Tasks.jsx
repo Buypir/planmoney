@@ -306,7 +306,7 @@ function Tasks() {
               className="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg px-3 py-2 w-full" placeholder={t('tasks_note_placeholder')} />
           </div>
           <button onClick={handleAdd}
-            className="flex items-center justify-center gap-2 bg-accent-500 text-white rounded-lg px-5 py-2 font-semibold hover:bg-accent-600 h-fit">
+            className="flex items-center justify-center gap-2 bg-accent-500 text-[var(--accent-ink)] rounded-lg px-5 py-2 font-semibold hover:bg-accent-600 h-fit">
             <Plus className="w-4 h-4" /> {t('tasks_add_button')}
           </button>
         </div>
@@ -319,7 +319,7 @@ function Tasks() {
             {tabs.map((tb) => (
               <button key={tb.key} onClick={() => changeTab(tb.key)}
                 className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  tab === tb.key ? 'bg-accent-500 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                  tab === tb.key ? 'bg-accent-500 text-[var(--accent-ink)]' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
                 }`}>
                 {tb.label} {tb.count}
               </button>
@@ -415,7 +415,7 @@ function Tasks() {
               {Array.from({ length: pageCount }, (_, i) => i).map((i) => (
                 <button key={i} onClick={() => setPage(i)}
                   className={`w-7 h-7 rounded-full text-xs font-medium ${
-                    currentPage === i ? 'bg-accent-500 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    currentPage === i ? 'bg-accent-500 text-[var(--accent-ink)]' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}>
                   {i + 1}
                 </button>
@@ -440,7 +440,7 @@ function Tasks() {
                 {t('common_cancel')}
               </button>
               <button onClick={saveEdit}
-                className="flex-1 bg-accent-500 text-white rounded-lg py-2 font-semibold hover:bg-accent-600">
+                className="flex-1 bg-accent-500 text-[var(--accent-ink)] rounded-lg py-2 font-semibold hover:bg-accent-600">
                 {t('tasks_save')}
               </button>
             </div>

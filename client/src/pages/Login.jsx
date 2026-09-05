@@ -64,7 +64,7 @@ function Login() {
 
         <button
           onClick={handleLogin}
-          className="w-full bg-accent-600 text-white rounded-lg py-2 font-semibold hover:bg-accent-700"
+          className="w-full bg-accent-600 text-[var(--accent-ink)] rounded-lg py-2 font-semibold hover:bg-accent-700"
         >
           {t('login_submit')}
         </button>

@@ -31,7 +31,7 @@ class ErrorBoundary extends Component {
           <div className="flex gap-2">
             <button
               onClick={() => window.location.reload()}
-              className="flex-1 bg-accent-600 text-white rounded-lg py-2 font-semibold hover:bg-accent-700"
+              className="flex-1 bg-accent-600 text-[var(--accent-ink)] rounded-lg py-2 font-semibold hover:bg-accent-700"
             >
               Перезавантажити
             </button>

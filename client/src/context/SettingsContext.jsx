@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { translate } from '../i18n';
 import { API_URL } from '../config';
+import { accentScale } from '../accent';
 
 const SettingsContext = createContext(null);
 
@@ -72,7 +73,11 @@ export function SettingsProvider({ children }) {
 
   useEffect(() => {
     if (!settings) return;
-    document.documentElement.dataset.accent = settings.accentColor || 'orange';
+    const scale = accentScale(settings.accentColor);
+    const root = document.documentElement;
+    for (const [step, hex] of Object.entries(scale)) {
+      root.style.setProperty(step === 'ink' ? '--accent-ink' : `--accent-${step}`, hex);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings?.accentColor]);
 

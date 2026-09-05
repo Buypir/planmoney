@@ -57,6 +57,7 @@ export const translations = {
     theme_dark: 'Темна',
     theme_system: 'Системна',
     accent_label: 'Акцентний колір',
+    accent_custom: 'Свій колір',
 
     finance_settings_title: 'Фінансові налаштування',
     currency_label: 'Валюта',
@@ -369,6 +370,7 @@ export const translations = {
     theme_dark: 'Dark',
     theme_system: 'System',
     accent_label: 'Accent color',
+    accent_custom: 'Custom color',
 
     finance_settings_title: 'Financial settings',
     currency_label: 'Currency',

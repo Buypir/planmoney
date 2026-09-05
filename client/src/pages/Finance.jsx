@@ -262,7 +262,7 @@ function Finance() {
               className="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg px-3 py-2" placeholder={t('finance_note_placeholder')} />
           </div>
           <button onClick={handleAdd}
-            className="flex items-center gap-2 bg-accent-500 text-white rounded-lg px-5 py-2 font-semibold hover:bg-accent-600">
+            className="flex items-center gap-2 bg-accent-500 text-[var(--accent-ink)] rounded-lg px-5 py-2 font-semibold hover:bg-accent-600">
             <Plus className="w-4 h-4" /> {t('finance_add_button')}
           </button>
         </div>
@@ -276,7 +276,7 @@ function Finance() {
               {tabs.map((tab) => (
                 <button key={tab.key} onClick={() => setFilter(tab.key)}
                   className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    filter === tab.key ? 'bg-accent-500 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                    filter === tab.key ? 'bg-accent-500 text-[var(--accent-ink)]' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
                   }`}>
                   {tab.label}
                 </button>

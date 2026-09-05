@@ -123,7 +123,7 @@ function AddTaskModal({ onClose }) {
           </button>
           <button
             onClick={handleAdd}
-            className="flex-1 bg-accent-500 text-white rounded-lg py-2 font-semibold hover:bg-accent-600"
+            className="flex-1 bg-accent-500 text-[var(--accent-ink)] rounded-lg py-2 font-semibold hover:bg-accent-600"
           >
             {t('tasks_add_button')}
           </button>
@@ -270,7 +270,7 @@ function AddTransactionModal({ onClose }) {
           </button>
           <button
             onClick={handleAdd}
-            className="flex-1 bg-accent-500 text-white rounded-lg py-2 font-semibold hover:bg-accent-600"
+            className="flex-1 bg-accent-500 text-[var(--accent-ink)] rounded-lg py-2 font-semibold hover:bg-accent-600"
           >
             {t('finance_add_button')}
           </button>
@@ -412,7 +412,7 @@ function Topbar() {
             key={p.key}
             onClick={() => setPeriod(p.key)}
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-              period === p.key ? 'bg-accent-500 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+              period === p.key ? 'bg-accent-500 text-[var(--accent-ink)]' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
             }`}
           >
             {p.label}
@@ -424,14 +424,14 @@ function Topbar() {
         <SearchBox />
         <button
           onClick={() => setShowTaskModal(true)}
-          className="flex items-center gap-2 bg-accent-500 text-white rounded-full px-4 py-2 text-sm font-medium hover:bg-accent-600"
+          className="flex items-center gap-2 bg-accent-500 text-[var(--accent-ink)] rounded-full px-4 py-2 text-sm font-medium hover:bg-accent-600"
         >
           <ListPlus className="w-4 h-4" />
           {t('topbar_add_task')}
         </button>
         <button
           onClick={() => setShowTxModal(true)}
-          className="flex items-center gap-2 bg-accent-500 text-white rounded-full px-4 py-2 text-sm font-medium hover:bg-accent-600"
+          className="flex items-center gap-2 bg-accent-500 text-[var(--accent-ink)] rounded-full px-4 py-2 text-sm font-medium hover:bg-accent-600"
         >
           <Plus className="w-4 h-4" />
           {t('topbar_add_transaction')}
