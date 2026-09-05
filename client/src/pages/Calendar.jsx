@@ -233,7 +233,9 @@ function Calendar() {
                   <div className="flex flex-col gap-2 mb-3">
                     {dayTransactions.map((tx) => (
                       <div key={tx.id} className="flex items-center justify-between text-sm">
-                        <span className="text-gray-700 dark:text-gray-200">{tx.category}</span>
+                        <span className="text-gray-700 dark:text-gray-200">
+                          {tx.type === 'transfer' ? t('finance_type_transfer') : tx.category}
+                        </span>
                         <span className={tx.type === 'income' ? 'text-green-600 font-medium' : 'text-red-500 font-medium'}>
                           {tx.type === 'income' ? '+' : '-'}{tx.amount.toLocaleString()} {t('currency_suffix')}
                         </span>

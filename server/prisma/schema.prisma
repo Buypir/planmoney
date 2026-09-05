@@ -30,6 +30,8 @@ model Account {
   id        Int      @id @default(autoincrement())
   name      String
   currency  String   @default("UAH")
+  // Закритий рахунок ховається зі списків, але його операції лишаються цілими
+  archived  Boolean  @default(false)
   createdAt DateTime @default(now())
 
   userId    Int

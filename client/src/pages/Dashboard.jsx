@@ -88,6 +88,18 @@ function Dashboard() {
     return days.map((day) => tasks.filter((task) => new Date(task.createdAt) <= day).length);
   })();
 
+  // Спершу невиконані з найближчим дедлайном — інакше в блоці опинялись
+  // просто перші п'ять задач у довільному порядку
+  const upcomingTasks = [...tasks]
+    .sort((a, b) => {
+      if ((a.status === 'done') !== (b.status === 'done')) return a.status === 'done' ? 1 : -1;
+      if (!a.dueDate && !b.dueDate) return 0;
+      if (!a.dueDate) return 1;
+      if (!b.dueDate) return -1;
+      return new Date(a.dueDate) - new Date(b.dueDate);
+    })
+    .slice(0, 5);
+
   const todayIncome = curTx.filter((tx) => tx.type === 'income').slice(0, 5);
   const todayExpense = curTx.filter((tx) => tx.type === 'expense').slice(0, 5);
   const periodLabelKey = { today: 'topbar_today', week: 'topbar_week', month: 'topbar_month', year: 'topbar_year' };
@@ -131,7 +143,7 @@ function Dashboard() {
             <p className="text-gray-400 text-sm">{t('dashboard_no_tasks')}</p>
           ) : (
             <div className="flex flex-col gap-3">
-              {tasks.slice(0, 5).map((task) => (
+              {upcomingTasks.map((task) => (
                 <div key={task.id} className="flex items-center gap-3">
                   <div className={`w-4 h-4 rounded border shrink-0 ${task.status === 'done' ? 'bg-accent-500 border-accent-500' : 'border-gray-300 dark:border-gray-600'}`}></div>
                   <div className="flex-1 min-w-0">

@@ -172,7 +172,8 @@ function AddTransactionModal({ onClose }) {
       body: JSON.stringify({
         amount: Number(amount),
         type,
-        category: type === 'transfer' ? t('finance_type_transfer') : category,
+        // Переказ не має категорії: назву показуємо з типу, інакше вона застигла б однією мовою
+        category: type === 'transfer' ? '' : category,
         note: note || null,
         accountId: accountId ? Number(accountId) : undefined,
         toAccountId: type === 'transfer' ? Number(toAccountId) : undefined,

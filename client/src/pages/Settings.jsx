@@ -65,13 +65,15 @@ function Settings() {
 
   const [goals, setGoals] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [accounts, setAccounts] = useState([]);
 
   const loadData = async () => {
-    const [meRes, catRes, goalsRes, txRes] = await Promise.all([
+    const [meRes, catRes, goalsRes, txRes, accRes] = await Promise.all([
       fetch(API_URL + '/auth/me', { headers: authHeaders }),
       fetch(API_URL + '/categories', { headers: authHeaders }),
       fetch(API_URL + '/goals', { headers: authHeaders }),
       fetch(API_URL + '/transactions', { headers: authHeaders }),
+      fetch(API_URL + '/accounts', { headers: authHeaders }),
     ]);
     const me = await meRes.json();
     setUser(me);
@@ -79,6 +81,7 @@ function Settings() {
     setCategories(await catRes.json());
     setGoals(await goalsRes.json());
     setTransactions(await txRes.json());
+    setAccounts(await accRes.json());
   };
 
   useEffect(() => {
@@ -127,12 +130,19 @@ function Settings() {
   };
 
   const handleExport = () => {
-    const header = [t('csv_date'), t('csv_type'), t('csv_category'), t('csv_amount'), t('csv_note')];
+    const accountById = Object.fromEntries(accounts.map((acc) => [acc.id, acc]));
+    const typeLabel = { income: t('csv_income'), expense: t('csv_expense'), transfer: t('finance_type_transfer') };
+
+    const header = [t('csv_date'), t('csv_type'), t('csv_category'), t('csv_amount'), t('csv_currency'), t('csv_account'), t('csv_note')];
     const rows = transactions.map((tx) => [
       new Date(tx.date).toLocaleDateString(settings.language === 'en' ? 'en-US' : 'uk-UA'),
-      tx.type === 'income' ? t('csv_income') : t('csv_expense'),
+      typeLabel[tx.type] || tx.type,
       tx.category,
       tx.amount,
+      accountById[tx.accountId]?.currency || 'UAH',
+      tx.type === 'transfer'
+        ? `${accountById[tx.accountId]?.name || '—'} → ${accountById[tx.toAccountId]?.name || '—'}`
+        : (accountById[tx.accountId]?.name || ''),
       tx.note || '',
     ]);
     const csv = [header, ...rows].map((r) => r.map((v) => `"${v}"`).join(',')).join('\n');

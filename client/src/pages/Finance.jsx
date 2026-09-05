@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { TrendingUp, TrendingDown, PiggyBank, Percent, ArrowLeftRight, Plus, Trash2, Wallet } from 'lucide-react';
+import { TrendingUp, TrendingDown, PiggyBank, Percent, ArrowLeftRight, Plus, Trash2, Archive, Wallet } from 'lucide-react';
 import Topbar, { REFRESH_EVENT } from '../components/Topbar';
 import StatCard from '../components/StatCard';
 import ExpenseChart from '../components/ExpenseChart';
@@ -26,6 +26,7 @@ function Finance() {
 
   const [newAccountName, setNewAccountName] = useState('');
   const [newAccountCurrency, setNewAccountCurrency] = useState('UAH');
+  const [accountError, setAccountError] = useState('');
 
   const [filter, setFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -67,7 +68,8 @@ function Finance() {
       body: JSON.stringify({
         amount: Number(amount),
         type,
-        category: type === 'transfer' ? t('finance_type_transfer') : category,
+        // Переказ не має категорії: назву показуємо з типу, інакше вона застигла б однією мовою
+        category: type === 'transfer' ? '' : category,
         note,
         accountId: accountId ? Number(accountId) : undefined,
         toAccountId: type === 'transfer' ? Number(toAccountId) : undefined,
@@ -100,15 +102,34 @@ function Finance() {
     loadData();
   };
 
+  // Рахунок із операціями видалити не можна — сервер запропонує заархівувати
   const handleDeleteAccount = async (id) => {
-    await fetch(`${API_URL}/accounts/${id}`, {
+    const res = await fetch(`${API_URL}/accounts/${id}`, {
       method: 'DELETE',
       headers: authHeaders,
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setAccountError(data.error || t('accounts_delete_failed'));
+      return;
+    }
+    setAccountError('');
+    loadData();
+  };
+
+  const handleArchiveAccount = async (id, archived) => {
+    await fetch(`${API_URL}/accounts/${id}/archive`, {
+      method: 'PUT',
+      headers: jsonHeaders,
+      body: JSON.stringify({ archived }),
+    });
+    setAccountError('');
     loadData();
   };
 
   const accountsById = Object.fromEntries(accounts.map((acc) => [acc.id, acc]));
+  const activeAccounts = accounts.filter((acc) => !acc.archived);
+  const archivedAccounts = accounts.filter((acc) => acc.archived);
   const baseTx = baseTransactions(transactions, accountsById, rates);
 
   const range = getPeriodRange(period);
@@ -243,7 +264,7 @@ function Finance() {
             <select value={accountId} onChange={(e) => setAccountId(e.target.value)}
               className="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg px-3 py-2">
               <option value="">—</option>
-              {accounts.map((acc) => <option key={acc.id} value={acc.id}>{acc.name} ({acc.currency})</option>)}
+              {activeAccounts.map((acc) => <option key={acc.id} value={acc.id}>{acc.name} ({acc.currency})</option>)}
             </select>
           </div>
           {type === 'transfer' && (
@@ -252,7 +273,7 @@ function Finance() {
               <select value={toAccountId} onChange={(e) => setToAccountId(e.target.value)}
                 className="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg px-3 py-2">
                 <option value="">—</option>
-                {accounts.map((acc) => <option key={acc.id} value={acc.id}>{acc.name} ({acc.currency})</option>)}
+                {activeAccounts.map((acc) => <option key={acc.id} value={acc.id}>{acc.name} ({acc.currency})</option>)}
               </select>
             </div>
           )}
@@ -316,7 +337,9 @@ function Finance() {
                           <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${typeBg[tx.type]}`}>
                             {typeIcon[tx.type]}
                           </div>
-                          <span className="text-gray-800 dark:text-gray-100 font-medium">{tx.category}</span>
+                          <span className="text-gray-800 dark:text-gray-100 font-medium">
+                            {tx.type === 'transfer' ? t('finance_type_transfer') : tx.category}
+                          </span>
                         </div>
                       </td>
                       <td className="py-3 pr-3 text-gray-400">{tx.note || '—'}</td>
@@ -365,13 +388,17 @@ function Finance() {
               <p className="text-gray-400 text-sm mb-3">{t('accounts_none')}</p>
             ) : (
               <div className="flex flex-col gap-2 mb-3">
-                {accounts.map((acc) => (
+                {activeAccounts.map((acc) => (
                   <div key={acc.id} className="flex items-center justify-between group">
                     <span className="text-sm text-gray-700 dark:text-gray-200">{acc.name}</span>
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium text-gray-800 dark:text-gray-100">
                         {formatMoney(accountBalance(acc.id), acc.currency, settings?.language)}
                       </span>
+                      <button onClick={() => handleArchiveAccount(acc.id, true)} title={t('accounts_archive_tooltip')}
+                        className="text-gray-300 hover:text-accent-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Archive className="w-3.5 h-3.5" />
+                      </button>
                       <button onClick={() => handleDeleteAccount(acc.id)} title={t('accounts_delete_tooltip')}
                         className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Trash2 className="w-3.5 h-3.5" />
@@ -379,6 +406,26 @@ function Finance() {
                     </div>
                   </div>
                 ))}
+
+                {archivedAccounts.length > 0 && (
+                  <div className="flex flex-col gap-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+                    <span className="text-xs text-gray-400">{t('accounts_archived_title')}</span>
+                    {archivedAccounts.map((acc) => (
+                      <div key={acc.id} className="flex items-center justify-between group">
+                        <span className="text-sm text-gray-400">{acc.name}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-gray-400">
+                            {formatMoney(accountBalance(acc.id), acc.currency, settings?.language)}
+                          </span>
+                          <button onClick={() => handleArchiveAccount(acc.id, false)}
+                            className="text-xs text-accent-600 hover:text-accent-700 opacity-0 group-hover:opacity-100 transition-opacity">
+                            {t('accounts_restore')}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 {/* Розбивка за валютами — показуємо лише коли валют справді кілька */}
                 {heldCurrencies.length > 1 && (
                   <div className="flex flex-col gap-1 pt-2 border-t border-gray-100 dark:border-gray-700">
@@ -399,6 +446,10 @@ function Finance() {
                   </span>
                 </div>
               </div>
+            )}
+
+            {accountError && (
+              <p className="text-xs text-red-500 mb-2">{accountError}</p>
             )}
 
             <div className="flex gap-2">

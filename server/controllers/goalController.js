@@ -73,12 +73,13 @@ const addToGoal = async (req, res) => {
     data: { savedAmount: goal.savedAmount + sum },
   });
 
+  // Категорією беремо назву цілі: підпис українською застигав би в базі
+  // й не перекладався при зміні мови
   await prisma.transaction.create({
     data: {
       amount: sum,
       type: 'expense',
-      category: `Накопичення: ${goal.title}`,
-      note: 'Переказ на ціль',
+      category: goal.title,
       userId: req.userId,
     },
   });
